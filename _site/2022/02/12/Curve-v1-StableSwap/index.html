@@ -1,0 +1,2951 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="SNZ RESEARCH">
+    <meta name="keywords" content="SNZresearch">
+    <meta name="theme-color" content="#000000">
+
+    <!-- Open Graph -->
+    <meta property="og:title"
+        content="Curve v1 StableSwap code review - SNZ RESEARCH">
+    
+    <meta property="og:type" content="article">
+    <meta property="og:description" content="Curve v1 StableSwap code review
+">
+    
+    <meta property="article:published_time" content=" 2022-02-12T00:00:00Z">
+    
+    
+    <meta property="article:author" content="0xstan@Dapp-Learning & 0xmc@SNZ">
+    
+    
+    <meta property="article:tag" content="Curve">
+    
+    <meta property="article:tag" content="code review">
+    
+    
+    <meta property="og:image" content="http://localhost:4000https://snzresearch.com/img/avatar-snzresearch.jpeg">
+    <meta property="og:url" content="http://localhost:4000/2022/02/12/Curve-v1-StableSwap/">
+    <meta property="og:site_name" content="SNZ RESEARCH">
+
+    <title>Curve v1 StableSwap code review - SNZ RESEARCH</title>
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/pwa/manifest.json">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="http://localhost:4000/2022/02/12/Curve-v1-StableSwap/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href=" /css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href=" /css/hux-blog.min.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet"
+        type="text/css">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+
+    <!-- Google AdSense -->
+    <script data-ad-client="ca-pub-6487568398225121" async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">SNZresearch</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div id="huxblog_navbar">
+                <div class="navbar-collapse">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href="/">Home</a>
+                        </li>
+                        
+                        
+                        
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                        
+                        
+                        <li>
+                            <a href="/archive/">Archive</a>
+                        </li>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <li class="search-icon">
+                            <a href="javascript:void(0)">
+                                <i class="fa fa-search"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <script>
+        // Drop Bootstarp low-performance Navbar
+        // Use customize navbar with high-quality material design animation
+        // in high-perf jank-free CSS3 implementation
+        var $body = document.body;
+        var $toggle = document.querySelector('.navbar-toggle');
+        var $navbar = document.querySelector('#huxblog_navbar');
+        var $collapse = document.querySelector('.navbar-collapse');
+
+        var __HuxNav__ = {
+            close: function () {
+                $navbar.className = " ";
+                // wait until animation end.
+                setTimeout(function () {
+                    // prevent frequently toggle
+                    if ($navbar.className.indexOf('in') < 0) {
+                        $collapse.style.height = "0px"
+                    }
+                }, 400)
+            },
+            open: function () {
+                $collapse.style.height = "auto"
+                $navbar.className += " in";
+            }
+        }
+
+        // Bind Event
+        $toggle.addEventListener('click', function (e) {
+            if ($navbar.className.indexOf('in') > 0) {
+                __HuxNav__.close()
+            } else {
+                __HuxNav__.open()
+            }
+        })
+
+        /**
+         * Since Fastclick is used to delegate 'touchstart' globally
+         * to hack 300ms delay in iOS by performing a fake 'click',
+         * Using 'e.stopPropagation' to stop 'touchstart' event from 
+         * $toggle/$collapse will break global delegation.
+         * 
+         * Instead, we use a 'e.target' filter to prevent handler
+         * added to document close HuxNav.  
+         *
+         * Also, we use 'click' instead of 'touchstart' as compromise
+         */
+        document.addEventListener('click', function (e) {
+            if (e.target == $toggle) return;
+            if (e.target.className == 'icon-bar') return;
+            __HuxNav__.close();
+        })
+    </script>
+    <!-- Search -->
+<div class="search-page">
+  <div class="search-icon-close-container">
+    <span class="search-icon-close">
+      <i class="fa fa-chevron-down"></i>
+    </span>
+  </div>
+  <div class="search-main container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <form></form>
+        <input type="text" id="search-input" placeholder="$ grep...">
+        </form>
+        <div id="search-results" class="mini-post-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/klein-bottle.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+
+
+
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('/img/klein-bottle.jpg');
+        background: ;
+    }
+
+    
+</style>
+
+<header class="intro-header" >
+
+    <div class="header-mask"></div>
+    
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/archive/?tag=Curve" title="Curve">Curve</a>
+                        
+                        <a class="tag" href="/archive/?tag=code+review" title="code review">code review</a>
+                        
+                    </div>
+                    <h1>Curve v1 StableSwap code review</h1>
+                    
+                    <h2 class="subheading">Curve v1 StableSwap code review</h2>
+                    <span class="meta">Posted by 0xstan@Dapp-Learning & 0xmc@SNZ on February 12, 2022</span>
+                    <div style="margin: 16px 0 0;">
+                        
+
+
+<ul class="list-inline">
+
+
+  
+  
+  <li>
+    <a href="https://twitter.com/intent/tweet?text=A good article 《Curve v1 StableSwap code review》 by @snzresearch https://snzresearch.com//2022/02/12/Curve-v1-StableSwap/">
+      <span class="fa-stack fa-lg">
+        <i class="fa fa-circle fa-stack-2x"></i>
+        <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+      </span>
+    </a>
+  </li>
+  
+  <!-- 
+  <li>
+    <a target="_blank" href="https://medium.com/@SNZ_Research">
+      <span class="fa-stack fa-lg">
+        <i class="fa fa-circle fa-stack-2x"></i>
+        <i class="fa fa-stack-1x fa-inverse">M</i>
+      </span>
+    </a>
+  </li>
+   -->
+</ul>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-9 col-lg-offset-1
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <!-- Multi-Lingual -->
+                
+
+				<h1 id="curve-v1-stableswap-code-review">Curve v1 StableSwap code review</h1>
+
+<blockquote>
+  <p>By 0xstan@Dapp-Learning &amp; 0xmc@SNZ</p>
+</blockquote>
+
+<p>curve v1 通过实现 StableSwap 恒等式的交易池，达到比恒定乘积(Uniswap)交易池更高效低滑点的效果。适合相互之间价格稳定的交易对，比如两个稳定币(DAI-USDC)或同一锚定标的的资产(ETH-sETH synthetic ETH)。</p>
+
+<h2 id="overview">overview</h2>
+
+<p>curve v1 核心公式</p>
+
+<p>将恒定和等式与恒定乘积等式合并，给予系数 $\chi$ (希腊字母)</p>
+
+<p>$\chi D^{n-1}\sum x_i+\prod x_i=\chi D^n + (\frac{D}{n})^n$</p>
+
+<!-- <img src="https://render.githubusercontent.com/render/math?math=\chi D^{n-1}\sum x_i%2B\prod x_i=\chi D^n %2B (\frac{D}{n})^n" /> -->
+
+<p>令 $\chi$ 为如下表达</p>
+
+<p>$\chi=\frac{A\prod x_i}{(D/n)^n}$</p>
+
+<!-- <img src="https://render.githubusercontent.com/render/math?math=\chi=\frac{A\prod x_i}{(D/n)^n}" /> -->
+
+<p>代入可得最终的核心公式</p>
+
+<p>$An^n\sum x_i + D = ADn^n + \frac{D^{n+1}}{n^n\prod x_i}$</p>
+
+<!-- <img src="https://render.githubusercontent.com/render/math?math=An^n\sum x_i%2BD = ADn^n%2B\frac{D^{n%2B1}}{n^n\prod x_i}" /> -->
+
+<h3 id="pool-templates">pool-templates</h3>
+
+<p>pool 交易池合约有 5 种，他们基本构造方法相同，但有不同风格。(5 种合约模板参见 <code class="language-plaintext highlighter-rouge">/contracts/pool-templates</code>)</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">a</code>: 用于交易 a-Token 类型的合约（余额自增的 token）的交易池子 <a href="../../Aave/contract/3-AToken.md#balanceof">aToken.balanceOf()</a></li>
+  <li><code class="language-plaintext highlighter-rouge">base</code>: 基础的交易池子</li>
+  <li><code class="language-plaintext highlighter-rouge">eth</code>: 带 ETH 的交易池子</li>
+  <li><code class="language-plaintext highlighter-rouge">meta</code>: 元池，基本资产与 curve LP token 的交易池子</li>
+  <li><code class="language-plaintext highlighter-rouge">y</code>: 用于交易 yearn-Token 类型的合约（可内生息的 token）的交易池子</li>
+</ul>
+
+<p>使用模板合约部署交易池合约，主要修改以下初始化参数</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">___USE_LENDING___</code>: 布尔值数组，交易资产中是否有从借贷协议中借出的资产</li>
+  <li><code class="language-plaintext highlighter-rouge">___N_COINS___</code>: 池子中的资产种类数量</li>
+  <li><code class="language-plaintext highlighter-rouge">___PRECISION_MUL___</code>: 整型数组，每个资产的精度调整到 1e18 所需的乘数</li>
+  <li><code class="language-plaintext highlighter-rouge">___RATES___</code>: 整型数组，每个资产统一精度到 1e36 所需的乘数</li>
+</ul>
+
+<p>Metapools 元池因为是某个资产和 base pool 类型的 lp token 组成交易对，所以还用了以下参数：</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">__BASE_N_COINS__</code>: base pool 内的 N</li>
+  <li><code class="language-plaintext highlighter-rouge">__BASE_PRECISION_MUL__</code>: base pool 内的 precision</li>
+  <li><code class="language-plaintext highlighter-rouge">__BASE_RATES__</code>: base pool 内的 rates</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">pooldata.json</code> 是主要用于测试的辅助参数，与合约内保持一致</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+</pre></td><td class="rouge-code"><pre><span class="p">{</span>
+    <span class="dl">"</span><span class="s2">wrapped_contract</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">yERC20</span><span class="dl">"</span><span class="p">,</span>   <span class="c1">// 测试用的 wrapped token 合约</span>
+    <span class="dl">"</span><span class="s2">base_pool_contract</span><span class="dl">"</span><span class="p">:</span> <span class="dl">""</span>        <span class="c1">// 元池中所对应的 base pool</span>
+    <span class="dl">"</span><span class="s2">coins</span><span class="dl">"</span><span class="p">:</span> <span class="p">[</span>                      <span class="c1">// each list item represents 1 swappable coin within the pool</span>
+        <span class="p">{</span>
+            <span class="dl">"</span><span class="s2">decimals</span><span class="dl">"</span><span class="p">:</span> <span class="mi">18</span><span class="p">,</span>          <span class="c1">// number of decimal places for the underlying coin</span>
+            <span class="dl">"</span><span class="s2">tethered</span><span class="dl">"</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>       <span class="c1">// 调用token的 transfer/approve 操作是否返回 `None` (true 是没有返回，标准ERC20 应该有返回布尔值，但usdt没有返回值)</span>
+            <span class="dl">"</span><span class="s2">wrapped</span><span class="dl">"</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>         <span class="c1">// token 是否为 wrapped token</span>
+            <span class="dl">"</span><span class="s2">wrapped_decimals</span><span class="dl">"</span><span class="p">:</span> <span class="mi">18</span><span class="p">,</span>  <span class="c1">// wrapped token 的精度，如果不是wrapped可以省略</span>
+        <span class="p">},</span>
+    <span class="p">]</span>
+    <span class="dl">"</span><span class="s2">rate_calculator_address</span><span class="dl">"</span><span class="p">:</span> <span class="dl">""</span>    <span class="c1">// 计算兑换率的策略合约地址</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="base-pool">base pool</h2>
+
+<p>基础的交易池子合约，例如 3pool</p>
+
+<h3 id="constans">constans</h3>
+
+<p>合约中的常量</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">RATES</code> 是一组汇率乘数，和 <code class="language-plaintext highlighter-rouge">balances</code> 相乘后，将精度统一到 1e36，最后和 <code class="language-plaintext highlighter-rouge">PRECISION</code> 相除，结果将统一成 1e18 精度
+    <ul>
+      <li>在 base pool 中， <code class="language-plaintext highlighter-rouge">RATES</code> 将只起到统一精度的作用，但在特殊的池子中 (例如 y pool) <code class="language-plaintext highlighter-rouge">RATES</code> 不但要统一精度，还需要从外部合约获取 coin 和其底层资产之间的汇率</li>
+      <li>详细情况参加后面对 <a href="#y-pool">y-pool 的解析</a></li>
+    </ul>
+  </li>
+  <li>fee 以 1e10 为 100%</li>
+  <li>手续费率，A 系数等参数可以经过治理投票后修改</li>
+  <li>A 系数的数值的修改是线性变化的</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+</pre></td><td class="rouge-code"><pre><span class="c1"># These constants must be set prior to compiling
+# 部署时的初始化参数
+</span><span class="n">N_COINS</span><span class="p">:</span> <span class="n">constant</span><span class="p">(</span><span class="n">int128</span><span class="p">)</span> <span class="o">=</span> <span class="n">___N_COINS___</span>
+<span class="n">PRECISION_MUL</span><span class="p">:</span> <span class="n">constant</span><span class="p">(</span><span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">])</span> <span class="o">=</span> <span class="n">___PRECISION_MUL___</span>
+<span class="n">RATES</span><span class="p">:</span> <span class="n">constant</span><span class="p">(</span><span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">])</span> <span class="o">=</span> <span class="n">___RATES___</span>
+
+<span class="c1"># fixed constants
+</span><span class="n">FEE_DENOMINATOR</span><span class="p">:</span> <span class="n">constant</span><span class="p">(</span><span class="n">uint256</span><span class="p">)</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">10</span> <span class="c1"># 计算手续费时的分母
+</span><span class="n">PRECISION</span><span class="p">:</span> <span class="n">constant</span><span class="p">(</span><span class="n">uint256</span><span class="p">)</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">18</span>  <span class="c1"># 计算资产数量时需要统一到的精度水平
+</span>
+<span class="n">MAX_ADMIN_FEE</span><span class="p">:</span> <span class="n">constant</span><span class="p">(</span><span class="n">uint256</span><span class="p">)</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">9</span> <span class="c1"># 管理员手续费率的最大值，设置费率不能超过此值 10%
+</span><span class="n">MAX_FEE</span><span class="p">:</span> <span class="n">constant</span><span class="p">(</span><span class="n">uint256</span><span class="p">)</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">9</span> <span class="c1"># 手续费率的最大值，设置费率不能超过此值 5%
+</span><span class="n">MAX_A</span><span class="p">:</span> <span class="n">constant</span><span class="p">(</span><span class="n">uint256</span><span class="p">)</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span> <span class="c1"># A 系数的最大值，当前3pool A = 2000
+</span><span class="n">MAX_A_CHANGE</span><span class="p">:</span> <span class="n">constant</span><span class="p">(</span><span class="n">uint256</span><span class="p">)</span> <span class="o">=</span> <span class="mi">10</span> <span class="c1"># 规定每次对A的调整不能超过原有值的倍数范围 即 1/10 * A &lt;= A' &lt;= 10*A
+</span>
+<span class="n">ADMIN_ACTIONS_DELAY</span><span class="p">:</span> <span class="n">constant</span><span class="p">(</span><span class="n">uint256</span><span class="p">)</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="mi">86400</span> <span class="c1"># 配置更改的延迟生效时间
+</span><span class="n">MIN_RAMP_TIME</span><span class="p">:</span> <span class="n">constant</span><span class="p">(</span><span class="n">uint256</span><span class="p">)</span> <span class="o">=</span> <span class="mi">86400</span> <span class="c1"># 线性修改A系数的最小时间间隔
+</span>
+<span class="n">A_PRECISION</span><span class="p">:</span> <span class="n">constant</span><span class="p">(</span><span class="n">uint256</span><span class="p">)</span> <span class="o">=</span> <span class="mi">100</span> <span class="c1"># A 的计算精度
+</span><span class="n">KILL_DEADLINE_DT</span><span class="p">:</span> <span class="n">constant</span><span class="p">(</span><span class="n">uint256</span><span class="p">)</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">30</span> <span class="o">*</span> <span class="mi">86400</span> <span class="c1"># 部署合约多久后才能调用 kill_me 方法
+</span></pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="variables">variables</h3>
+
+<ul>
+  <li>注意 <code class="language-plaintext highlighter-rouge">A</code> 的值是 <code class="language-plaintext highlighter-rouge">A*N_COINS**(N_COINS-1)</code>, 因为涉及 A 的计算部分都有 N**(N-1)，所以直接将乘积作为 A 值</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+</pre></td><td class="rouge-code"><pre><span class="n">coins</span><span class="p">:</span> <span class="n">public</span><span class="p">(</span><span class="n">address</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">])</span> <span class="c1"># 资产 token 地址数组
+</span><span class="n">balances</span><span class="p">:</span> <span class="n">public</span><span class="p">(</span><span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">])</span> <span class="c1"># 资产的数量
+</span><span class="n">fee</span><span class="p">:</span> <span class="n">public</span><span class="p">(</span><span class="n">uint256</span><span class="p">)</span>  <span class="c1"># fee * 1e10
+</span><span class="n">admin_fee</span><span class="p">:</span> <span class="n">public</span><span class="p">(</span><span class="n">uint256</span><span class="p">)</span>  <span class="c1"># admin_fee * 1e10
+</span>
+<span class="n">owner</span><span class="p">:</span> <span class="n">public</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+<span class="n">lp_token</span><span class="p">:</span> <span class="n">public</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+
+<span class="n">initial_A</span><span class="p">:</span> <span class="n">public</span><span class="p">(</span><span class="n">uint256</span><span class="p">)</span> <span class="c1"># A 的初始值，或调整之前的值
+</span><span class="n">future_A</span><span class="p">:</span> <span class="n">public</span><span class="p">(</span><span class="n">uint256</span><span class="p">)</span> <span class="c1"># A 的当前值，或调整的目标值
+</span><span class="n">initial_A_time</span><span class="p">:</span> <span class="n">public</span><span class="p">(</span><span class="n">uint256</span><span class="p">)</span> <span class="c1"># A 的调整开始时间
+</span><span class="n">future_A_time</span><span class="p">:</span> <span class="n">public</span><span class="p">(</span><span class="n">uint256</span><span class="p">)</span> <span class="c1"># A 的调整完成时间
+</span>
+<span class="n">admin_actions_deadline</span><span class="p">:</span> <span class="n">public</span><span class="p">(</span><span class="n">uint256</span><span class="p">)</span> <span class="c1"># 当调整commit提交后，管理员执行调整的 deadline
+</span><span class="n">transfer_ownership_deadline</span><span class="p">:</span> <span class="n">public</span><span class="p">(</span><span class="n">uint256</span><span class="p">)</span> <span class="c1"># 当移交所有权commit提交后，管理员执行调整的 deadline
+</span><span class="n">future_fee</span><span class="p">:</span> <span class="n">public</span><span class="p">(</span><span class="n">uint256</span><span class="p">)</span> <span class="c1"># 调整手续费率的目标值
+</span><span class="n">future_admin_fee</span><span class="p">:</span> <span class="n">public</span><span class="p">(</span><span class="n">uint256</span><span class="p">)</span> <span class="c1"># 调整管理员手续费率的目标值
+</span><span class="n">future_owner</span><span class="p">:</span> <span class="n">public</span><span class="p">(</span><span class="n">address</span><span class="p">)</span> <span class="c1"># 调整所有权的目标地址
+</span>
+<span class="n">is_killed</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="n">kill_deadline</span><span class="p">:</span> <span class="n">uint256</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="functions">functions</h3>
+
+<h4 id="constructor">constructor</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+</pre></td><td class="rouge-code"><pre><span class="o">@</span><span class="n">external</span>
+<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+    <span class="n">_owner</span><span class="p">:</span> <span class="n">address</span><span class="p">,</span>
+    <span class="n">_coins</span><span class="p">:</span> <span class="n">address</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">],</span>
+    <span class="n">_pool_token</span><span class="p">:</span> <span class="n">address</span><span class="p">,</span>
+    <span class="n">_A</span><span class="p">:</span> <span class="n">uint256</span><span class="p">,</span>
+    <span class="n">_fee</span><span class="p">:</span> <span class="n">uint256</span><span class="p">,</span>
+    <span class="n">_admin_fee</span><span class="p">:</span> <span class="n">uint256</span>
+<span class="p">):</span>
+    <span class="s">"""
+    @notice Contract constructor
+    @param _owner Contract owner address
+    @param _coins Addresses of ERC20 conracts of coins
+    @param _pool_token Address of the token representing LP share
+    @param _A Amplification coefficient multiplied by n * (n - 1)
+    @param _fee Fee to charge for exchanges
+    @param _admin_fee Admin fee
+    """</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_COINS</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">_coins</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">ZERO_ADDRESS</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">coins</span> <span class="o">=</span> <span class="n">_coins</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">initial_A</span> <span class="o">=</span> <span class="n">_A</span> <span class="o">*</span> <span class="n">A_PRECISION</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">future_A</span> <span class="o">=</span> <span class="n">_A</span> <span class="o">*</span> <span class="n">A_PRECISION</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">fee</span> <span class="o">=</span> <span class="n">_fee</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">admin_fee</span> <span class="o">=</span> <span class="n">_admin_fee</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">owner</span> <span class="o">=</span> <span class="n">_owner</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">kill_deadline</span> <span class="o">=</span> <span class="n">block</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">+</span> <span class="n">KILL_DEADLINE_DT</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">lp_token</span> <span class="o">=</span> <span class="n">_pool_token</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="a">A</h4>
+
+<p>主要逻辑在 <code class="language-plaintext highlighter-rouge">_A()</code>，由于 A 系数不能突然发生较大变化，这样造成的内部价格突然变化，从而导致被外部套利者利用，套走过多资产。所以对 A 修改是线性变化的，而非立即变成目标值。其计算逻辑可改写为如下形式：</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="n">A_current</span> <span class="o">=</span> <span class="n">A_initial</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">A_future</span> <span class="o">-</span> <span class="n">A_initial</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">t_current</span> <span class="o">-</span> <span class="n">t_initial</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">t_future</span> <span class="o">-</span> <span class="n">t_initial</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<blockquote>
+  <p>观察核心公式可知，A 值越大，恒定和等式部分的项权重越大，其图形就越趋近于直线，A 值越小则趋近于恒定乘积的等式，图形更为弯曲（当 N=2 时，可以理解为更趋近于 Uniswap 的形状）。所以当 A 值变化时，图形的弯曲程度会发生改变，资产之间的价格也随之改变。如果突然有很大的变化，会导致池子内部价格与外部价格偏差过大，产生较大的套利空间。</p>
+</blockquote>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+</pre></td><td class="rouge-code"><pre><span class="o">@</span><span class="n">view</span>
+<span class="o">@</span><span class="n">internal</span>
+<span class="k">def</span> <span class="nf">_A</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">uint256</span><span class="p">:</span>
+    <span class="s">"""
+    Handle ramping A up or down
+    """</span>
+    <span class="n">t1</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">future_A_time</span>
+    <span class="n">A1</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">future_A</span>
+
+    <span class="k">if</span> <span class="n">block</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">&lt;</span> <span class="n">t1</span><span class="p">:</span>
+        <span class="n">A0</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">initial_A</span>
+        <span class="n">t0</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">initial_A_time</span>
+        <span class="c1"># Expressions in uint256 cannot have negative numbers, thus "if"
+</span>        <span class="c1"># 因为合约中不能有负值，所以这里要判断大小，给出减法的顺序
+</span>        <span class="k">if</span> <span class="n">A1</span> <span class="o">&gt;</span> <span class="n">A0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">A0</span> <span class="o">+</span> <span class="p">(</span><span class="n">A1</span> <span class="o">-</span> <span class="n">A0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">block</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">A0</span> <span class="o">-</span> <span class="p">(</span><span class="n">A0</span> <span class="o">-</span> <span class="n">A1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">block</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># when t1 == 0 or block.timestamp &gt;= t1
+</span>        <span class="k">return</span> <span class="n">A1</span>
+
+
+<span class="o">@</span><span class="n">view</span>
+<span class="o">@</span><span class="n">external</span>
+<span class="k">def</span> <span class="nf">A</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">uint256</span><span class="p">:</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="p">.</span><span class="n">_A</span><span class="p">()</span> <span class="o">/</span> <span class="n">A_PRECISION</span>
+
+
+<span class="o">@</span><span class="n">view</span>
+<span class="o">@</span><span class="n">external</span>
+<span class="k">def</span> <span class="nf">A_precise</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">uint256</span><span class="p">:</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="p">.</span><span class="n">_A</span><span class="p">()</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="xp">xp</h4>
+
+<p>存放每个资产价值(balance * price)的数组</p>
+
+<ul>
+  <li>base-pool 中，RATES是统一精度的数组，但其实是因为资产是锚定同一种标的的token，比如稳定币之间，都锚定美元，所以price都是1</li>
+  <li>而在 a-pool 和 y-pool 中，RATES 将包含价格 <a href="#a-pool-and-y-pool">详见 a-pool, y-pool</a></li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+</pre></td><td class="rouge-code"><pre><span class="s">'''返回当前池子的xp'''</span>
+<span class="o">@</span><span class="n">view</span>
+<span class="o">@</span><span class="n">internal</span>
+<span class="k">def</span> <span class="nf">_xp</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]:</span>
+    <span class="n">result</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]</span> <span class="o">=</span> <span class="n">RATES</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_COINS</span><span class="p">):</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="p">.</span><span class="n">balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">PRECISION</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="s">'''指定balance数量计算xp'''</span>
+<span class="o">@</span><span class="n">pure</span>
+<span class="o">@</span><span class="n">internal</span>
+<span class="k">def</span> <span class="nf">_xp_mem</span><span class="p">(</span><span class="n">_balances</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]:</span>
+    <span class="n">result</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]</span> <span class="o">=</span> <span class="n">RATES</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_COINS</span><span class="p">):</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">_balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">PRECISION</span>
+    <span class="k">return</span> <span class="n">result</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="virtual_price">virtual_price</h4>
+
+<p><code class="language-plaintext highlighter-rouge">virtual_price = D / lp_totalSupply</code></p>
+
+<ul>
+  <li>D 的单位与 DAI 相似，精度 1e18</li>
+  <li>当价格处于平衡点，D = n * 每个资产的总价值</li>
+  <li>此时 D 就是整个池子资产组合的总(虚拟)价值</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+</pre></td><td class="rouge-code"><pre><span class="o">@</span><span class="n">view</span>
+<span class="o">@</span><span class="n">external</span>
+<span class="k">def</span> <span class="nf">get_virtual_price</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">uint256</span><span class="p">:</span>
+    <span class="s">"""
+    @notice The current virtual price of the pool LP token
+    @dev Useful for calculating profits
+    @return LP token virtual price normalized to 1e18
+    """</span>
+    <span class="n">D</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_get_D</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">_xp</span><span class="p">(),</span> <span class="bp">self</span><span class="p">.</span><span class="n">_A</span><span class="p">())</span>
+    <span class="c1"># D is in the units similar to DAI (e.g. converted to precision 1e18)
+</span>    <span class="c1"># When balanced, D = n * x_u - total virtual value of the portfolio
+</span>    <span class="n">token_supply</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">ERC20</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">lp_token</span><span class="p">).</span><span class="n">totalSupply</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">D</span> <span class="o">*</span> <span class="n">PRECISION</span> <span class="o">/</span> <span class="n">token_supply</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="calc_token_amount">calc_token_amount</h4>
+
+<p>计算调用 deposit 和 withdraw 后，lp token 的变化数量。该方法会考虑滑点的影响，但不包括手续费。主要用于防止抢跑攻击，而非用于交易的精确计算。</p>
+
+<p>根据 D 的变化比例来同比计算 lp token 的变化。</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+</pre></td><td class="rouge-code"><pre><span class="o">@</span><span class="n">view</span>
+<span class="o">@</span><span class="n">external</span>
+<span class="k">def</span> <span class="nf">calc_token_amount</span><span class="p">(</span><span class="n">_amounts</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">],</span> <span class="n">_is_deposit</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">uint256</span><span class="p">:</span>
+    <span class="s">"""
+    @notice Calculate addition or reduction in token supply from a deposit or withdrawal
+    @dev This calculation accounts for slippage, but not fees.
+         Needed to prevent front-running, not for precise calculations!
+    @param _amounts Amount of each coin being deposited
+    @param _is_deposit set True for deposits, False for withdrawals
+    @return Expected amount of LP tokens received
+    """</span>
+    <span class="n">amp</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_A</span><span class="p">()</span>
+    <span class="n">balances</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">balances</span>
+    <span class="n">D0</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_get_D_mem</span><span class="p">(</span><span class="n">balances</span><span class="p">,</span> <span class="n">amp</span><span class="p">)</span> <span class="c1"># 缓存变化之前的D
+</span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_COINS</span><span class="p">):</span> <span class="c1"># 遍历改变每个资产的数量
+</span>        <span class="k">if</span> <span class="n">_is_deposit</span><span class="p">:</span>
+            <span class="n">balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">_amounts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-=</span> <span class="n">_amounts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">D1</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_get_D_mem</span><span class="p">(</span><span class="n">balances</span><span class="p">,</span> <span class="n">amp</span><span class="p">)</span> <span class="c1"># 计算变化之后的D
+</span>    <span class="n">token_amount</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">CurveToken</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">lp_token</span><span class="p">).</span><span class="n">totalSupply</span><span class="p">()</span>
+    <span class="n">diff</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">_is_deposit</span><span class="p">:</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">D1</span> <span class="o">-</span> <span class="n">D0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">D0</span> <span class="o">-</span> <span class="n">D1</span>
+    <span class="c1"># 根据D的变化比例计算lp token变化量
+</span>    <span class="c1"># (delta D / D0) * totalSupply
+</span>    <span class="k">return</span> <span class="n">diff</span> <span class="o">*</span> <span class="n">token_amount</span> <span class="o">/</span> <span class="n">D0</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="add_liquidity">add_liquidity</h4>
+
+<p>添加流动性，向池子注入资产。传入资产数量数组和最小 lp token mint 数量，返回实际 mint 的数量。</p>
+
+<ol>
+  <li>根据传入 token 数量，计算 D 的增量 delta D1
+    <ul>
+      <li>不考虑手续费的影响</li>
+      <li><code class="language-plaintext highlighter-rouge">assert delta D1 &gt; 0</code></li>
+    </ul>
+  </li>
+  <li>考虑手续费的影响，计算 D 的增量 delta D2
+    <ul>
+      <li>先算出不考虑手续费时，每个资产的变化数量(difference_balance)</li>
+      <li>根据费率分别计算每个资产的手续费</li>
+      <li><code class="language-plaintext highlighter-rouge">fee_i = fee_rate * difference_balance</code></li>
+      <li>将资产数量减去手续费的数量，然后重新计算考虑手续费影响的 D 值，进而得到 <code class="language-plaintext highlighter-rouge">delta D2</code></li>
+    </ul>
+  </li>
+  <li>根据 delta D2 与 D 的比例，同比计算新增 lp token 数量
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">mint amount = (delta D2 / D) * totalSupply</code></li>
+      <li>如果 mint 数量 &lt; 设定的最小数量，交易回滚</li>
+    </ul>
+  </li>
+  <li>将资产 token 从用户转入本合约，为用户 mint lp token，最后返回实际 mint 数量</li>
+</ol>
+
+<p>关于 lp token 流动性数量的含义：</p>
+
+<ul>
+  <li>池子首次添加流动性，不会收取手续费，且 mint 数量就是 D 值</li>
+  <li>如果不考虑手续费影响，lp token 数量与 D 值同步</li>
+  <li>如果添加流动性的资产比例，不会改变当前价格，其过程也不会发生交易，因此就不会产生手续费</li>
+</ul>
+
+<p>admin_fee 是一个百分比，当前是 50%，含义是协议将手续手续中的一定比例，作为协议费用。收取的协议费(admin fee) 的资产不会计入 balances 字段，所以 <code class="language-plaintext highlighter-rouge">ERC20.balanceOf(this) - self.balance</code> 将是现阶段可收取的 <code class="language-plaintext highlighter-rouge">admin_fee</code>。</p>
+
+<p>关于 <code class="language-plaintext highlighter-rouge">N_COINS / (4 * (N_COINS - 1))</code></p>
+
+<ul>
+  <li>不平衡的添加流动性时，会针对不平衡的部分收取交易手续费，但因为用户只存入了输入 token，并没有提出输出 token，该交易并不完整，所以需要让手续费乘以一个减小系数</li>
+  <li>当 N = 2 时，该系数将是最高的 1/2</li>
+  <li>当 N 非常大，该系数将无限趋近于 1/4</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+</pre></td><td class="rouge-code"><pre><span class="o">@</span><span class="n">external</span>
+<span class="o">@</span><span class="n">nonreentrant</span><span class="p">(</span><span class="s">'lock'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">add_liquidity</span><span class="p">(</span><span class="n">_amounts</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">],</span> <span class="n">_min_mint_amount</span><span class="p">:</span> <span class="n">uint256</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">uint256</span><span class="p">:</span>
+    <span class="s">"""
+    @notice Deposit coins into the pool
+    @param _amounts List of amounts of coins to deposit
+    @param _min_mint_amount Minimum amount of LP tokens to mint from the deposit
+    @return Amount of LP tokens received by depositing
+    """</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">.</span><span class="n">is_killed</span>  <span class="c1"># dev: is killed
+</span>
+    <span class="n">amp</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_A</span><span class="p">()</span>
+    <span class="n">old_balances</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">balances</span>
+
+    <span class="c1"># Initial invariant
+</span>    <span class="c1"># 计算变化前的D数值
+</span>    <span class="n">D0</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_get_D_mem</span><span class="p">(</span><span class="n">old_balances</span><span class="p">,</span> <span class="n">amp</span><span class="p">)</span>
+
+    <span class="n">lp_token</span><span class="p">:</span> <span class="n">address</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">lp_token</span>
+    <span class="n">token_supply</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">CurveToken</span><span class="p">(</span><span class="n">lp_token</span><span class="p">).</span><span class="n">totalSupply</span><span class="p">()</span>
+    <span class="n">new_balances</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]</span> <span class="o">=</span> <span class="n">old_balances</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_COINS</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">token_supply</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">_amounts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>  <span class="c1"># 初次添加流动性，每种资产的数量都必须大于0
+</span>        <span class="c1"># balances store amounts of c-tokens
+</span>        <span class="c1"># ?? 这里注释有疑问，base pool 应该不会有c-token ??
+</span>        <span class="n">new_balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">_amounts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="c1"># Invariant after change
+</span>    <span class="c1"># 计算变化后的D值（不考虑手续费影响）
+</span>    <span class="n">D1</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_get_D_mem</span><span class="p">(</span><span class="n">new_balances</span><span class="p">,</span> <span class="n">amp</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">D1</span> <span class="o">&gt;</span> <span class="n">D0</span>
+
+    <span class="c1"># We need to recalculate the invariant accounting for fees
+</span>    <span class="c1"># to calculate fair user's share
+</span>    <span class="c1"># 我们需要公平的计算用户的份额（考虑手续费）
+</span>    <span class="n">D2</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">D1</span>
+    <span class="n">fees</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]</span> <span class="o">=</span> <span class="n">empty</span><span class="p">(</span><span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">])</span>
+    <span class="n">mint_amount</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">token_supply</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># Only account for fees if we are not the first to deposit
+</span>        <span class="c1"># 初次添加流动性不会收取手续费，换言之，后续的添加都会收取
+</span>        <span class="c1"># N_COINS / (4 * (N_COINS - 1)) 的意义是可以根据N来调节手续费
+</span>        <span class="c1"># 当 N = 2 时，该系数将是最高的 1/2
+</span>        <span class="c1"># 当 N 非常大，该系数将无限趋近于 1/4
+</span>        <span class="n">fee</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">fee</span> <span class="o">*</span> <span class="n">N_COINS</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="p">(</span><span class="n">N_COINS</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">admin_fee</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">admin_fee</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_COINS</span><span class="p">):</span>
+            <span class="c1"># ideal_balance 每个资产理想的数量不考虑手续费
+</span>            <span class="c1"># difference 每个资产理想数值与现值的差量
+</span>            <span class="c1"># fee_i = difference * fee_rate
+</span>            <span class="c1"># 实际资产数量 = 理想数量 - 手续费
+</span>            <span class="c1"># new_balance_i = ideal_balance - fee_i
+</span>            <span class="n">ideal_balance</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">D1</span> <span class="o">*</span> <span class="n">old_balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">D0</span>
+            <span class="n">difference</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">new_balance</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">new_balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">ideal_balance</span> <span class="o">&gt;</span> <span class="n">new_balance</span><span class="p">:</span>
+                <span class="n">difference</span> <span class="o">=</span> <span class="n">ideal_balance</span> <span class="o">-</span> <span class="n">new_balance</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">difference</span> <span class="o">=</span> <span class="n">new_balance</span> <span class="o">-</span> <span class="n">ideal_balance</span>
+            <span class="n">fees</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">fee</span> <span class="o">*</span> <span class="n">difference</span> <span class="o">/</span> <span class="n">FEE_DENOMINATOR</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_balance</span> <span class="o">-</span> <span class="p">(</span><span class="n">fees</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">admin_fee</span> <span class="o">/</span> <span class="n">FEE_DENOMINATOR</span><span class="p">)</span>
+            <span class="n">new_balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-=</span> <span class="n">fees</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="c1"># 根据扣除手续费之后的资产数量，计算新的D值
+</span>        <span class="c1"># 然后同比计算 lp token 的增量，即为 mint 数量
+</span>        <span class="n">D2</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_get_D_mem</span><span class="p">(</span><span class="n">new_balances</span><span class="p">,</span> <span class="n">amp</span><span class="p">)</span>
+        <span class="n">mint_amount</span> <span class="o">=</span> <span class="n">token_supply</span> <span class="o">*</span> <span class="p">(</span><span class="n">D2</span> <span class="o">-</span> <span class="n">D0</span><span class="p">)</span> <span class="o">/</span> <span class="n">D0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># 初次添加流动性，不收取手续费，池子资产数量即为本地添加的数量
+</span>        <span class="c1"># lp token 数量就是D，
+</span>        <span class="bp">self</span><span class="p">.</span><span class="n">balances</span> <span class="o">=</span> <span class="n">new_balances</span>
+        <span class="n">mint_amount</span> <span class="o">=</span> <span class="n">D1</span>  <span class="c1"># Take the dust if there was any
+</span>    <span class="k">assert</span> <span class="n">mint_amount</span> <span class="o">&gt;=</span> <span class="n">_min_mint_amount</span><span class="p">,</span> <span class="s">"Slippage screwed you"</span>
+
+    <span class="c1"># Take coins from the sender
+</span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_COINS</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">_amounts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># "safeTransferFrom" which works for ERC20s which return bool or not
+</span>            <span class="n">_response</span><span class="p">:</span> <span class="n">Bytes</span><span class="p">[</span><span class="mi">32</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw_call</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">.</span><span class="n">coins</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="n">concat</span><span class="p">(</span>
+                    <span class="n">method_id</span><span class="p">(</span><span class="s">"transferFrom(address,address,uint256)"</span><span class="p">),</span>
+                    <span class="n">convert</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">sender</span><span class="p">,</span> <span class="n">bytes32</span><span class="p">),</span>
+                    <span class="n">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bytes32</span><span class="p">),</span>
+                    <span class="n">convert</span><span class="p">(</span><span class="n">_amounts</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">bytes32</span><span class="p">),</span>
+                <span class="p">),</span>
+                <span class="n">max_outsize</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_response</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">convert</span><span class="p">(</span><span class="n">_response</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>  <span class="c1"># dev: failed transfer
+</span>            <span class="c1"># end "safeTransferFrom"
+</span>
+    <span class="c1"># Mint pool tokens
+</span>    <span class="n">CurveToken</span><span class="p">(</span><span class="n">lp_token</span><span class="p">).</span><span class="n">mint</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">sender</span><span class="p">,</span> <span class="n">mint_amount</span><span class="p">)</span>
+
+    <span class="n">log</span> <span class="n">AddLiquidity</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">sender</span><span class="p">,</span> <span class="n">_amounts</span><span class="p">,</span> <span class="n">fees</span><span class="p">,</span> <span class="n">D1</span><span class="p">,</span> <span class="n">token_supply</span> <span class="o">+</span> <span class="n">mint_amount</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">mint_amount</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<!-- #### N_COINS / (4 \* (N_COINS - 1))
+
+不平衡的添加或移除流动性时，针对不平衡的部分，会收取手续费，手续费率会乘以 `N_COINS / (4 * (N_COINS - 1))`。
+
+![fee_imbalance](/img/curve/fee_imbalance.png)
+
+上图所示，注意其中每个格子代表的是 coin 的价值 (xp)，而非数量 balances。
+
+1. 初始池子的价值比例是 3:2:3，BTC 的资产少于其他资产
+2. 如果添加流动性，可以使池子中资产的价值恢复平衡 (balance)，则不会收取手续费，例如总共添加 4，以 1:2:1 的比例，此时池子将变为 4:4:4 ，恢复价值平衡
+3. 如果添加流动性，池子没有恢复平衡，则需要对不平衡的部分收取手续费
+   - 例如以 0:4:0 的比例添加
+   - 先计算总价值的平均数，`avg = (3+6+3) / N = 4`
+   - 将添加的价值和 avg 比较，累计差量 `diff = (4-3) + (6-4) + (4-3) = 4`, 注意差量取绝对值
+   - 差量即为图中 绿色 + 蓝色 部分
+   - 可以看出 不平衡的增量 `increment` 和 `diff` 的比值是 `N/(2*(N-1))`
+   - 由此可以计算 `increment = diff * N/(2*(N-1))`
+   - 我们可以认为用户在添加流动性时，做了一笔输入为 `increment` 的交易，但是没有提走输出 token，因此我们只收取普通交易费的一半
+   - `fee = increment * fee_rate / 2`
+   - `fee = diff * N/(2*(N-1)) * fee_rate / 2`
+4. 移除流动性，若池子没有恢复平衡，同理
+
+假如用户先添加单一资产 `i` 的流动性，再移除等价值的单一资产 `j` 的流动性，实际上就是绕过了 `exchange` 函数做了一笔交易，所以需要对不平衡部分的流动性操作，收取一半交易手续费。 -->
+
+<h4 id="exchange">exchange</h4>
+
+<p>交易，输入单一资产 <code class="language-plaintext highlighter-rouge">i</code>，输出另一个单一资产 <code class="language-plaintext highlighter-rouge">j</code>，规定最小获得的输出数量 <code class="language-plaintext highlighter-rouge">_min_dy</code>，返回实际交易输出数量 (dy)。</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+</pre></td><td class="rouge-code"><pre><span class="o">@</span><span class="n">external</span>
+<span class="o">@</span><span class="n">nonreentrant</span><span class="p">(</span><span class="s">'lock'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">exchange</span><span class="p">(</span><span class="n">i</span><span class="p">:</span> <span class="n">int128</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span> <span class="n">int128</span><span class="p">,</span> <span class="n">_dx</span><span class="p">:</span> <span class="n">uint256</span><span class="p">,</span> <span class="n">_min_dy</span><span class="p">:</span> <span class="n">uint256</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">uint256</span><span class="p">:</span>
+    <span class="s">"""
+    @notice Perform an exchange between two coins
+    @dev Index values can be found via the `coins` public getter method
+    @param i Index value for the coin to send
+    @param j Index valie of the coin to recieve
+    @param _dx Amount of `i` being exchanged
+    @param _min_dy Minimum amount of `j` to receive
+    @return Actual amount of `j` received
+    """</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">.</span><span class="n">is_killed</span>  <span class="c1"># dev: is killed
+</span>
+    <span class="c1"># 根据当前资产数量计算现有每个资产的总价值 xp
+</span>    <span class="n">old_balances</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">balances</span>
+    <span class="n">xp</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_xp_mem</span><span class="p">(</span><span class="n">old_balances</span><span class="p">)</span>
+
+    <span class="c1"># 计算输入资产后，输出资产的价值，即y
+</span>    <span class="n">rates</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]</span> <span class="o">=</span> <span class="n">RATES</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">xp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">_dx</span> <span class="o">*</span> <span class="n">rates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">PRECISION</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_get_y</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">xp</span><span class="p">)</span>
+
+    <span class="c1"># 计算输出资产的价值变化量，即 dy
+</span>    <span class="c1"># 防止计算精度引起的数值不准确，向下舍入 (-1)
+</span>    <span class="c1"># 计算手续费价值 dy_fee
+</span>    <span class="n">dy</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">xp</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span> <span class="o">-</span> <span class="mi">1</span>  <span class="c1"># -1 just in case there were some rounding errors
+</span>    <span class="n">dy_fee</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">dy</span> <span class="o">*</span> <span class="bp">self</span><span class="p">.</span><span class="n">fee</span> <span class="o">/</span> <span class="n">FEE_DENOMINATOR</span>
+
+    <span class="c1"># Convert all to real units
+</span>    <span class="c1"># 将扣除手续费后的价值 (dy - dy_fee) , 并统一精度 PRECISION = 1e18
+</span>    <span class="n">dy</span> <span class="o">=</span> <span class="p">(</span><span class="n">dy</span> <span class="o">-</span> <span class="n">dy_fee</span><span class="p">)</span> <span class="o">*</span> <span class="n">PRECISION</span> <span class="o">/</span> <span class="n">rates</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">dy</span> <span class="o">&gt;=</span> <span class="n">_min_dy</span><span class="p">,</span> <span class="s">"Exchange resulted in fewer coins than expected"</span>
+
+    <span class="c1"># 从手续费价值中抽取一定比例的协议费，并转根据价格转换成实际的输出资产数量
+</span>    <span class="n">dy_admin_fee</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">dy_fee</span> <span class="o">*</span> <span class="bp">self</span><span class="p">.</span><span class="n">admin_fee</span> <span class="o">/</span> <span class="n">FEE_DENOMINATOR</span>
+    <span class="n">dy_admin_fee</span> <span class="o">=</span> <span class="n">dy_admin_fee</span> <span class="o">*</span> <span class="n">PRECISION</span> <span class="o">/</span> <span class="n">rates</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+
+    <span class="c1"># Change balances exactly in same way as we change actual ERC20 coin amounts
+</span>    <span class="c1"># 将输入数量加到balances上，我们实际运算的是 ERC20 数量
+</span>    <span class="bp">self</span><span class="p">.</span><span class="n">balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">old_balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">_dx</span>
+    <span class="c1"># When rounding errors happen, we undercharge admin fee in favor of LP
+</span>    <span class="c1"># 当舍入错误发生，协议将不收取协议费来支持流动性的发展
+</span>    <span class="c1"># 除以 FEE_DENOMINATOR 时，会将小于 FEE_DENOMINATOR 的数量舍入，所以认为这部分是少收了协议费
+</span>    <span class="c1">#
+</span>    <span class="c1"># 输出资产的数量 减去实际输出给用户的数量(fee会保留在合约中)， 再扣除协议费数量
+</span>    <span class="c1"># 值得注意的是，这里 balance - dy 已经将交易手续费fee留给了 lp 提供者
+</span>    <span class="c1"># 然后协议又从 lp 提供者的fee份额中，抽取了协议费
+</span>    <span class="bp">self</span><span class="p">.</span><span class="n">balances</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">old_balances</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">dy</span> <span class="o">-</span> <span class="n">dy_admin_fee</span>
+
+    <span class="c1"># 转入输入资产
+</span>    <span class="n">_response</span><span class="p">:</span> <span class="n">Bytes</span><span class="p">[</span><span class="mi">32</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw_call</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">coins</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+        <span class="n">concat</span><span class="p">(</span>
+            <span class="n">method_id</span><span class="p">(</span><span class="s">"transferFrom(address,address,uint256)"</span><span class="p">),</span>
+            <span class="n">convert</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">sender</span><span class="p">,</span> <span class="n">bytes32</span><span class="p">),</span>
+            <span class="n">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bytes32</span><span class="p">),</span>
+            <span class="n">convert</span><span class="p">(</span><span class="n">_dx</span><span class="p">,</span> <span class="n">bytes32</span><span class="p">),</span>
+        <span class="p">),</span>
+        <span class="n">max_outsize</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_response</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">convert</span><span class="p">(</span><span class="n">_response</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+
+    <span class="c1"># 转出输出资产
+</span>    <span class="n">_response</span> <span class="o">=</span> <span class="n">raw_call</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">coins</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
+        <span class="n">concat</span><span class="p">(</span>
+            <span class="n">method_id</span><span class="p">(</span><span class="s">"transfer(address,uint256)"</span><span class="p">),</span>
+            <span class="n">convert</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">sender</span><span class="p">,</span> <span class="n">bytes32</span><span class="p">),</span>
+            <span class="n">convert</span><span class="p">(</span><span class="n">dy</span><span class="p">,</span> <span class="n">bytes32</span><span class="p">),</span>
+        <span class="p">),</span>
+        <span class="n">max_outsize</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_response</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">convert</span><span class="p">(</span><span class="n">_response</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+
+    <span class="n">log</span> <span class="n">TokenExchange</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">sender</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">_dx</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">dy</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dy</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="remove_liquidity">remove_liquidity</h4>
+
+<p>移除流动性，传入要移除的 lp token 数量 <code class="language-plaintext highlighter-rouge">_amount</code> ，最小赎回资产数量数组 <code class="language-plaintext highlighter-rouge">_min_amounts</code>，转给调用者的资产数量将按照池子当前的资产比分配，返回赎回的资产数量数组。</p>
+
+<p>由于该方法将保持池子内现有的资产比例，不会引起价格改变，<strong>该方法不收取手续费</strong>。</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+</pre></td><td class="rouge-code"><pre><span class="o">@</span><span class="n">external</span>
+<span class="o">@</span><span class="n">nonreentrant</span><span class="p">(</span><span class="s">'lock'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">remove_liquidity</span><span class="p">(</span><span class="n">_amount</span><span class="p">:</span> <span class="n">uint256</span><span class="p">,</span> <span class="n">_min_amounts</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]:</span>
+    <span class="s">"""
+    @notice Withdraw coins from the pool
+    @dev Withdrawal amounts are based on current deposit ratios
+    @param _amount Quantity of LP tokens to burn in the withdrawal
+    @param _min_amounts Minimum amounts of underlying coins to receive
+    @return List of amounts of coins that were withdrawn
+    """</span>
+    <span class="n">lp_token</span><span class="p">:</span> <span class="n">address</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">lp_token</span>
+    <span class="n">total_supply</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">CurveToken</span><span class="p">(</span><span class="n">lp_token</span><span class="p">).</span><span class="n">totalSupply</span><span class="p">()</span>
+    <span class="n">amounts</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]</span> <span class="o">=</span> <span class="n">empty</span><span class="p">(</span><span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_COINS</span><span class="p">):</span>
+        <span class="c1"># 根据移除的 lp token 数量与总数的比例，同比计算balance的变化量，即为赎回的数量
+</span>        <span class="c1"># 这里没有收取手续费
+</span>        <span class="n">old_balance</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">value</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">old_balance</span> <span class="o">*</span> <span class="n">_amount</span> <span class="o">/</span> <span class="n">total_supply</span>
+        <span class="k">assert</span> <span class="n">value</span> <span class="o">&gt;=</span> <span class="n">_min_amounts</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s">"Withdrawal resulted in fewer coins than expected"</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">old_balance</span> <span class="o">-</span> <span class="n">value</span>
+        <span class="n">amounts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">_response</span><span class="p">:</span> <span class="n">Bytes</span><span class="p">[</span><span class="mi">32</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw_call</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">coins</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+            <span class="n">concat</span><span class="p">(</span>
+                <span class="n">method_id</span><span class="p">(</span><span class="s">"transfer(address,uint256)"</span><span class="p">),</span>
+                <span class="n">convert</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">sender</span><span class="p">,</span> <span class="n">bytes32</span><span class="p">),</span>
+                <span class="n">convert</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">bytes32</span><span class="p">),</span>
+            <span class="p">),</span>
+            <span class="n">max_outsize</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_response</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">convert</span><span class="p">(</span><span class="n">_response</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+
+    <span class="n">CurveToken</span><span class="p">(</span><span class="n">lp_token</span><span class="p">).</span><span class="n">burnFrom</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">sender</span><span class="p">,</span> <span class="n">_amount</span><span class="p">)</span>  <span class="c1"># dev: insufficient funds
+</span>
+    <span class="n">log</span> <span class="n">RemoveLiquidity</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">sender</span><span class="p">,</span> <span class="n">amounts</span><span class="p">,</span> <span class="n">empty</span><span class="p">(</span><span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]),</span> <span class="n">total_supply</span> <span class="o">-</span> <span class="n">_amount</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">amounts</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="remove_liquidity_imbalance">remove_liquidity_imbalance</h4>
+
+<p>(不平衡的)移除流动性，传入要赎回的资产数量数组 <code class="language-plaintext highlighter-rouge">_amounts</code>, 最大能销毁的 lp token 数量 <code class="language-plaintext highlighter-rouge">_max_burn_amount</code>，转给调用者的资产数量将按照入参分配，返回实际销毁掉的 lp token 数量。</p>
+
+<p>由于其中包含引起不平衡的流动性，导致池子内资产数量比例发生变化，进而导致价格改变，<strong>该方法要收取手续费</strong>。</p>
+
+<ol>
+  <li>根据传入 token 数量，计算 D 的减量 delta D1
+    <ul>
+      <li>不考虑手续费的影响</li>
+    </ul>
+  </li>
+  <li>考虑手续费的影响，计算 D 的减量 delta D2
+    <ul>
+      <li>先算出不考虑手续费时，流动性中引起资产不平衡的数量(difference_balance)</li>
+      <li>根据费率分别计算每个资产的手续费</li>
+      <li><code class="language-plaintext highlighter-rouge">fee_i = fee_rate * difference_balance</code></li>
+      <li>将资产数量减去手续费的数量，然后重新计算考虑手续费影响的 D 值，进而得到 <code class="language-plaintext highlighter-rouge">delta D2</code></li>
+      <li>由于余额部分已经扣除了手续费，所以根据 <code class="language-plaintext highlighter-rouge">new_balance</code> 计算 D 值会略少于真实的 D 值，这部分将导致销毁更多的 LP token</li>
+      <li>即，该函数将保证用户赎回资产的数量和 <code class="language-plaintext highlighter-rouge">_amounts</code> 保持一致，但会多销毁 LP token，作为手续费</li>
+    </ul>
+  </li>
+  <li>根据 delta D2 与 D 的比例，同比计算减少 lp token 数量
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">burn_amount = (delta D2 / D) * totalSupply</code></li>
+      <li><code class="language-plaintext highlighter-rouge">assert burn_amount != 0</code></li>
+      <li><code class="language-plaintext highlighter-rouge">assert burn_amount &lt;= _max_burn_amount</code></li>
+    </ul>
+  </li>
+  <li>将资产按照入参的数量转给用户，销毁用户的 lp token，最后返回实际 burn 数量</li>
+</ol>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+</pre></td><td class="rouge-code"><pre><span class="o">@</span><span class="n">external</span>
+<span class="o">@</span><span class="n">nonreentrant</span><span class="p">(</span><span class="s">'lock'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">remove_liquidity_imbalance</span><span class="p">(</span><span class="n">_amounts</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">],</span> <span class="n">_max_burn_amount</span><span class="p">:</span> <span class="n">uint256</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">uint256</span><span class="p">:</span>
+    <span class="s">"""
+    @notice Withdraw coins from the pool in an imbalanced amount
+    @param _amounts List of amounts of underlying coins to withdraw
+    @param _max_burn_amount Maximum amount of LP token to burn in the withdrawal
+    @return Actual amount of the LP token burned in the withdrawal
+    """</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">.</span><span class="n">is_killed</span>  <span class="c1"># dev: is killed
+</span>
+    <span class="c1"># 计算变化前的D值
+</span>    <span class="n">amp</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_A</span><span class="p">()</span>
+    <span class="n">old_balances</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">balances</span>
+    <span class="n">D0</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_get_D_mem</span><span class="p">(</span><span class="n">old_balances</span><span class="p">,</span> <span class="n">amp</span><span class="p">)</span>
+    <span class="n">new_balances</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]</span> <span class="o">=</span> <span class="n">old_balances</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_COINS</span><span class="p">):</span>
+        <span class="n">new_balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-=</span> <span class="n">_amounts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="c1"># 计算移除指定资产数量后的 D 值
+</span>    <span class="n">D1</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_get_D_mem</span><span class="p">(</span><span class="n">new_balances</span><span class="p">,</span> <span class="n">amp</span><span class="p">)</span>
+
+    <span class="c1"># N_COINS / (4 * (N_COINS - 1)) 的含义参照前文描述
+</span>    <span class="n">fee</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">fee</span> <span class="o">*</span> <span class="n">N_COINS</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="p">(</span><span class="n">N_COINS</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">admin_fee</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">admin_fee</span>
+    <span class="n">fees</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]</span> <span class="o">=</span> <span class="n">empty</span><span class="p">(</span><span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_COINS</span><span class="p">):</span>
+        <span class="n">new_balance</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">new_balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">ideal_balance</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">D1</span> <span class="o">*</span> <span class="n">old_balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">D0</span>
+        <span class="n">difference</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">ideal_balance</span> <span class="o">&gt;</span> <span class="n">new_balance</span><span class="p">:</span>
+            <span class="n">difference</span> <span class="o">=</span> <span class="n">ideal_balance</span> <span class="o">-</span> <span class="n">new_balance</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">difference</span> <span class="o">=</span> <span class="n">new_balance</span> <span class="o">-</span> <span class="n">ideal_balance</span>
+        <span class="n">fees</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">fee</span> <span class="o">*</span> <span class="n">difference</span> <span class="o">/</span> <span class="n">FEE_DENOMINATOR</span>
+        <span class="c1"># 全局balances只减去 admin_fee 部分
+</span>        <span class="c1"># 而用于后续计算 D 值的 new_balances 将扣除完整的手续费
+</span>        <span class="bp">self</span><span class="p">.</span><span class="n">balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_balance</span> <span class="o">-</span> <span class="p">(</span><span class="n">fees</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">admin_fee</span> <span class="o">/</span> <span class="n">FEE_DENOMINATOR</span><span class="p">)</span>
+        <span class="n">new_balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_balance</span> <span class="o">-</span> <span class="n">fees</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="c1"># D2 将比实际的 D 值略小，因为扣除了手续费的价值
+</span>    <span class="c1"># 后续将导致多销毁调用者的 LP token
+</span>    <span class="n">D2</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_get_D_mem</span><span class="p">(</span><span class="n">new_balances</span><span class="p">,</span> <span class="n">amp</span><span class="p">)</span>
+
+    <span class="n">lp_token</span><span class="p">:</span> <span class="n">address</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">lp_token</span>
+    <span class="n">token_supply</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">CurveToken</span><span class="p">(</span><span class="n">lp_token</span><span class="p">).</span><span class="n">totalSupply</span><span class="p">()</span>
+    <span class="n">token_amount</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="p">(</span><span class="n">D0</span> <span class="o">-</span> <span class="n">D2</span><span class="p">)</span> <span class="o">*</span> <span class="n">token_supply</span> <span class="o">/</span> <span class="n">D0</span>
+    <span class="k">assert</span> <span class="n">token_amount</span> <span class="o">!=</span> <span class="mi">0</span>  <span class="c1"># dev: zero tokens burned
+</span>    <span class="n">token_amount</span> <span class="o">+=</span> <span class="mi">1</span>  <span class="c1"># In case of rounding errors - make it unfavorable for the "attacker"
+</span>    <span class="k">assert</span> <span class="n">token_amount</span> <span class="o">&lt;=</span> <span class="n">_max_burn_amount</span><span class="p">,</span> <span class="s">"Slippage screwed you"</span>
+
+    <span class="n">CurveToken</span><span class="p">(</span><span class="n">lp_token</span><span class="p">).</span><span class="n">burnFrom</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">sender</span><span class="p">,</span> <span class="n">token_amount</span><span class="p">)</span>  <span class="c1"># dev: insufficient funds
+</span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_COINS</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">_amounts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">_response</span><span class="p">:</span> <span class="n">Bytes</span><span class="p">[</span><span class="mi">32</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw_call</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">.</span><span class="n">coins</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="n">concat</span><span class="p">(</span>
+                    <span class="n">method_id</span><span class="p">(</span><span class="s">"transfer(address,uint256)"</span><span class="p">),</span>
+                    <span class="n">convert</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">sender</span><span class="p">,</span> <span class="n">bytes32</span><span class="p">),</span>
+                    <span class="n">convert</span><span class="p">(</span><span class="n">_amounts</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">bytes32</span><span class="p">),</span>
+                <span class="p">),</span>
+                <span class="n">max_outsize</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_response</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">convert</span><span class="p">(</span><span class="n">_response</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+
+    <span class="n">log</span> <span class="n">RemoveLiquidityImbalance</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">sender</span><span class="p">,</span> <span class="n">_amounts</span><span class="p">,</span> <span class="n">fees</span><span class="p">,</span> <span class="n">D1</span><span class="p">,</span> <span class="n">token_supply</span> <span class="o">-</span> <span class="n">token_amount</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">token_amount</span>
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="d">D</h4>
+
+<p>由于 curve 的平衡方程，无法直接写出 D 的解析式，curve 在合约中使用了<a href="https://en.wikipedia.org/wiki/Newton%27s_method">牛顿法</a>迭代求近似解。</p>
+
+<p>$x_{n+1}=x_n-\frac{f(x_n)}{f’(x_n)}$</p>
+
+<!-- <img src="https://render.githubusercontent.com/render/math?math=x_{n%2B1}=x_n-\frac{f(x_n)}{f'(x_n)}" /> -->
+
+<p>简单理解牛顿法就是利用上述公式，不断迭代 <code class="language-plaintext highlighter-rouge">x_n+1</code> 的值，使其越来越逼近真实的解</p>
+
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/NewtonIteration_Ani.gif/600px-NewtonIteration_Ani.gif" alt="newton's method" /></p>
+
+<p>代码中使用的牛顿法的函数 <code class="language-plaintext highlighter-rouge">f(D)</code>，是用核心公式推导得来，下面简述推导过程：</p>
+
+<ol>
+  <li>
+    <p>首先将核心公式变形成 <code class="language-plaintext highlighter-rouge">f(D) = 0</code> 的形式</p>
+
+    <p>$f(D)=An^n\sum x_i + D-ADn^n-\frac{D^{n+1}}{n^n\prod x_i}$
+<!-- <img src="https://render.githubusercontent.com/render/math?math=f(D)=An^n\sum x_i%2BD-ADn^n-\frac{D^{n%2B1}}{n^n\prod x_i}" /> --></p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">D_new = D - f(D)/f'(D)</code></p>
+
+    <p>$D_{new}=D-\frac{An^n\sum x_i + D-ADn^n-\frac{D^{n+1}}{n^n\prod x_i}}{1-An^n-(n+1)\frac{D^n}{n^n\prod x_i}}$
+<!-- <img src="https://render.githubusercontent.com/render/math?math=D_{new}=D-\frac{An^n\sum x_i%2BD-ADn^n-\frac{D^{n%2B1}}{n^n\prod x_i}}{1-An^n-(n%2B1)\frac{D^n}{n^n\prod x_i}}" /> --></p>
+  </li>
+  <li>
+    <p>最终变成代码中的形态</p>
+
+    <p>$D_{new}=\frac{An^n\sum x_i-\frac{D^{n+1}}{n^n\prod x_i}}{An^n+(n+1)\frac{D^n}{n^n\prod x_i}-1}$
+<!-- <img src="https://render.githubusercontent.com/render/math?math=D_{new}=\frac{An^n\sum x_i-\frac{D^{n%2B1}}{n^n\prod x_i}}{An^n%2B(n%2B1)\frac{D^n}{n^n\prod x_i}-1}" /> --></p>
+  </li>
+  <li>
+    <p>for 循环迭代求 D 的解，当迭代到 D 与上一次的差值 &lt;= 1 时，停止迭代；</p>
+  </li>
+  <li>
+    <p>通常轮迭代不超过 4 轮就会找到最优解；但如果迭代 255 次仍然没有找到合适的解，程序终止，交易回滚 (revert)；用户可以通过 <code class="language-plaintext highlighter-rouge">remove_liquidity</code> 方法回收资产；</p>
+  </li>
+</ol>
+
+<blockquote>
+  <p><strong>注意</strong>：<mark>注释中的牛顿法公式写漏了一项，而代码写的是正确的化简后的公式</mark>。</p>
+</blockquote>
+
+<ul>
+  <li><a href="https://github.com/curvefi/curve-contract/blob/master/contracts/pool-templates/base/SwapTemplateBase.vy#L214">curve-contract SwapTemplateBase.vy#L214</a></li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+</pre></td><td class="rouge-code"><pre><span class="o">@</span><span class="n">pure</span>
+<span class="o">@</span><span class="n">internal</span>
+<span class="k">def</span> <span class="nf">_get_D</span><span class="p">(</span><span class="n">_xp</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">],</span> <span class="n">_amp</span><span class="p">:</span> <span class="n">uint256</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">uint256</span><span class="p">:</span>
+    <span class="s">"""
+    D invariant calculation in non-overflowing integer operations
+    iteratively
+
+    A * sum(x_i) * n**n + D = A * D * n**n + D**(n+1) / (n**n * prod(x_i))
+
+    Converging solution:
+    D[j+1] = (A * n**n * sum(x_i) - D[j]**(n+1) / (n**n prod(x_i))) / (A * n**n + (n+1)*D[j]**n/(n**n prod(x_i)) - 1)
+
+    这里原版代码注释分母漏掉了一项
+    (n+1)*D[j]**n/(n**n prod(x_i))
+
+    原版代码链接:
+    https://github.com/curvefi/curve-contract/blob/master/contracts/pool-templates/base/SwapTemplateBase.vy#L214
+    """</span>
+    <span class="n">S</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">Dprev</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">_x</span> <span class="ow">in</span> <span class="n">_xp</span><span class="p">:</span>
+        <span class="n">S</span> <span class="o">+=</span> <span class="n">_x</span>
+    <span class="k">if</span> <span class="n">S</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="n">D</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">S</span>
+    <span class="n">Ann</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">_amp</span> <span class="o">*</span> <span class="n">N_COINS</span>
+    <span class="k">for</span> <span class="n">_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">255</span><span class="p">):</span>
+        <span class="n">D_P</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">D</span>
+        <span class="k">for</span> <span class="n">_x</span> <span class="ow">in</span> <span class="n">_xp</span><span class="p">:</span>
+            <span class="n">D_P</span> <span class="o">=</span> <span class="n">D_P</span> <span class="o">*</span> <span class="n">D</span> <span class="o">/</span> <span class="p">(</span><span class="n">_x</span> <span class="o">*</span> <span class="n">N_COINS</span><span class="p">)</span>  <span class="c1"># If division by 0, this will be borked: only withdrawal will work. And that is good
+</span>            <span class="c1"># 只有当移除流动性时才有可能 _x 为0，这时程序会崩溃
+</span>            <span class="c1"># 只能平衡的移除流动性, remove_liquidity 不会调用牛顿法求解，这也是期望的结果
+</span>            <span class="c1"># 添加流动性，池内的xp值不可能为0
+</span>        <span class="n">Dprev</span> <span class="o">=</span> <span class="n">D</span>
+        <span class="n">D</span> <span class="o">=</span> <span class="p">(</span><span class="n">Ann</span> <span class="o">*</span> <span class="n">S</span> <span class="o">/</span> <span class="n">A_PRECISION</span> <span class="o">+</span> <span class="n">D_P</span> <span class="o">*</span> <span class="n">N_COINS</span><span class="p">)</span> <span class="o">*</span> <span class="n">D</span> <span class="o">/</span> <span class="p">((</span><span class="n">Ann</span> <span class="o">-</span> <span class="n">A_PRECISION</span><span class="p">)</span> <span class="o">*</span> <span class="n">D</span> <span class="o">/</span> <span class="n">A_PRECISION</span> <span class="o">+</span> <span class="p">(</span><span class="n">N_COINS</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">D_P</span><span class="p">)</span>
+        <span class="c1"># Equality with the precision of 1
+</span>        <span class="c1"># 当迭代的新值和上次之差，小于等于 1，即0或1
+</span>        <span class="c1"># 认为找到了局部最优解
+</span>        <span class="k">if</span> <span class="n">D</span> <span class="o">&gt;</span> <span class="n">Dprev</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">D</span> <span class="o">-</span> <span class="n">Dprev</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">D</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">Dprev</span> <span class="o">-</span> <span class="n">D</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">D</span>
+    <span class="c1"># convergence typically occurs in 4 rounds or less, this should be unreachable!
+</span>    <span class="c1"># if it does happen the pool is borked and LPs can withdraw via `remove_liquidity`
+</span>    <span class="k">raise</span>
+
+
+<span class="o">@</span><span class="n">view</span>
+<span class="o">@</span><span class="n">internal</span>
+<span class="k">def</span> <span class="nf">_get_D_mem</span><span class="p">(</span><span class="n">_balances</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">],</span> <span class="n">_amp</span><span class="p">:</span> <span class="n">uint256</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">uint256</span><span class="p">:</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="p">.</span><span class="n">_get_D</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">_xp_mem</span><span class="p">(</span><span class="n">_balances</span><span class="p">),</span> <span class="n">_amp</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="y">y</h4>
+
+<p>输入资产 <code class="language-plaintext highlighter-rouge">i</code> ，变化之后的数量 <code class="language-plaintext highlighter-rouge">x</code>，变化之前的 <code class="language-plaintext highlighter-rouge">_xp</code>，计算输出资产 <code class="language-plaintext highlighter-rouge">j</code> 变化后的数量。</p>
+
+<p>与计算 D 一样，这里也使用了牛顿法计算 y, 即 <code class="language-plaintext highlighter-rouge">x_j</code>，其 <code class="language-plaintext highlighter-rouge">f(x_j)</code> 推导过程如下：</p>
+
+<p>$An^n\sum x_i + D = ADn^n + \frac{D^{n+1}}{n^n\prod x_i}$</p>
+
+<!-- <img src="https://render.githubusercontent.com/render/math?math=An^n\sum x_i%2BD = ADn^n%2B\frac{D^{n%2B1}}{n^n\prod x_i}" /> -->
+
+<ol>
+  <li>设 <code class="language-plaintext highlighter-rouge">sum'</code>, <code class="language-plaintext highlighter-rouge">prod'</code> 分别为排除输出资产数量的累加和累乘结果
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">sum' = sum(x) - x_j</code></li>
+      <li><code class="language-plaintext highlighter-rouge">prod' = prod(x) / x_j</code></li>
+    </ul>
+  </li>
+  <li>
+    <p>核心公式除以 <code class="language-plaintext highlighter-rouge">A*n**n</code></p>
+
+    <p>$\sum{x_i}+\frac{D}{An^n}-D=\frac{D^{n+1}}{An^nn^n\prod x_i}$
+ <!-- <img src="https://render.githubusercontent.com/render/math?math=\sum x_i%2B\frac{D}{An^n}-D=\frac{D^{n%2B1}}{An^nn^n\prod x_i}" /> --></p>
+  </li>
+  <li>
+    <p>乘以 <code class="language-plaintext highlighter-rouge">x_j</code>，并代入 <code class="language-plaintext highlighter-rouge">sum'</code> 和 <code class="language-plaintext highlighter-rouge">prod'</code></p>
+
+    <p>$x_j(x_j+sum’)-x_j(An^n-1)\frac{D}{An^n}=\frac{D^{n+1}x_j}{An^{2n}(prod’*x_j)}$
+<!-- <img src="https://render.githubusercontent.com/render/math?math=x_j(x_j%2Bsum')-x_j(An^n-1)\frac{D}{An^n}=\frac{D^{n%2B1}x_j}{An^{2n}(prod'*x_j)}" /> --></p>
+  </li>
+  <li>
+    <p>展开多项式，即为牛顿法使用的 <code class="language-plaintext highlighter-rouge">f(x_j)</code></p>
+
+    <p>$x_j^2+x_j(sum’-(An^n-1)\frac{D}{An^n})=\frac{D^{n+1}}{An^{2n}prod’}$
+<!-- <img src="https://render.githubusercontent.com/render/math?math=x_j^2%2Bx_j(sum'-(An^n-1)\frac{D}{An^n})=\frac{D^{n%2B1}}{An^{2n}prod'}" /> --></p>
+  </li>
+  <li>
+    <p>将其写为 <code class="language-plaintext highlighter-rouge">x_j**2 + b*x_j = c</code> 形式，代入牛顿法公式 <code class="language-plaintext highlighter-rouge">x = x - f(x) / f'(x)</code></p>
+
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">x_j = (x_j**2 + c) / (2*x_j + b)</code></li>
+    </ul>
+  </li>
+</ol>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+</pre></td><td class="rouge-code"><pre><span class="o">@</span><span class="n">view</span>
+<span class="o">@</span><span class="n">internal</span>
+<span class="k">def</span> <span class="nf">_get_y</span><span class="p">(</span><span class="n">i</span><span class="p">:</span> <span class="n">int128</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span> <span class="n">int128</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">uint256</span><span class="p">,</span> <span class="n">_xp</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">uint256</span><span class="p">:</span>
+    <span class="s">"""
+    Calculate x[j] if one makes x[i] = x
+
+    Done by solving quadratic equation iteratively.
+    x_1**2 + x_1 * (sum' - (A*n**n - 1) * D / (A * n**n)) = D ** (n + 1) / (n ** (2 * n) * prod' * A)
+    x_1**2 + b*x_1 = c
+
+    x_1 = (x_1**2 + c) / (2*x_1 + b)
+    """</span>
+    <span class="c1"># x in the input is converted to the same price/precision
+</span>
+    <span class="k">assert</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span>       <span class="c1"># dev: same coin
+</span>    <span class="k">assert</span> <span class="n">j</span> <span class="o">&gt;=</span> <span class="mi">0</span>       <span class="c1"># dev: j below zero
+</span>    <span class="k">assert</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">N_COINS</span>  <span class="c1"># dev: j above N_COINS
+</span>
+    <span class="c1"># should be unreachable, but good for safety
+</span>    <span class="k">assert</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N_COINS</span>
+
+    <span class="n">A</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_A</span><span class="p">()</span>
+    <span class="n">D</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_get_D</span><span class="p">(</span><span class="n">_xp</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span>
+    <span class="n">Ann</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">A</span> <span class="o">*</span> <span class="n">N_COINS</span>
+    <span class="n">c</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">D</span>      <span class="c1"># c 提前乘以D
+</span>    <span class="n">S</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">_x</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">y_prev</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># for 排除 i == j 的情况，即排除输出资产的xp
+</span>    <span class="c1"># c将被乘以 N-1 次 D
+</span>    <span class="k">for</span> <span class="n">_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_COINS</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">_i</span> <span class="o">==</span> <span class="n">i</span><span class="p">:</span>
+            <span class="n">_x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="k">elif</span> <span class="n">_i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
+            <span class="n">_x</span> <span class="o">=</span> <span class="n">_xp</span><span class="p">[</span><span class="n">_i</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">S</span> <span class="o">+=</span> <span class="n">_x</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">c</span> <span class="o">*</span> <span class="n">D</span> <span class="o">/</span> <span class="p">(</span><span class="n">_x</span> <span class="o">*</span> <span class="n">N_COINS</span><span class="p">)</span>
+    <span class="c1"># for循环之后，c中含有 D^N ，而根据公式，还需要乘以一次 D
+</span>    <span class="n">c</span> <span class="o">=</span> <span class="n">c</span> <span class="o">*</span> <span class="n">D</span> <span class="o">*</span> <span class="n">A_PRECISION</span> <span class="o">/</span> <span class="p">(</span><span class="n">Ann</span> <span class="o">*</span> <span class="n">N_COINS</span><span class="p">)</span>
+    <span class="n">b</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">S</span> <span class="o">+</span> <span class="n">D</span> <span class="o">*</span> <span class="n">A_PRECISION</span> <span class="o">/</span> <span class="n">Ann</span>  <span class="c1"># - D
+</span>    <span class="n">y</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">D</span>      <span class="c1"># 牛顿法的初值设为 D
+</span>    <span class="k">for</span> <span class="n">_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">255</span><span class="p">):</span>
+        <span class="n">y_prev</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">y</span> <span class="o">+</span> <span class="n">b</span> <span class="o">-</span> <span class="n">D</span><span class="p">)</span>
+        <span class="c1"># Equality with the precision of 1
+</span>        <span class="k">if</span> <span class="n">y</span> <span class="o">&gt;</span> <span class="n">y_prev</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">y</span> <span class="o">-</span> <span class="n">y_prev</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">y</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">y_prev</span> <span class="o">-</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">y</span>
+    <span class="k">raise</span>
+
+
+<span class="o">@</span><span class="n">view</span>
+<span class="o">@</span><span class="n">external</span>
+<span class="k">def</span> <span class="nf">get_dy</span><span class="p">(</span><span class="n">i</span><span class="p">:</span> <span class="n">int128</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span> <span class="n">int128</span><span class="p">,</span> <span class="n">_dx</span><span class="p">:</span> <span class="n">uint256</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">uint256</span><span class="p">:</span>
+    <span class="n">xp</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_xp</span><span class="p">()</span>
+    <span class="n">rates</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]</span> <span class="o">=</span> <span class="n">RATES</span>
+
+    <span class="n">x</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">xp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">_dx</span> <span class="o">*</span> <span class="n">rates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">PRECISION</span><span class="p">)</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_get_y</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">xp</span><span class="p">)</span>
+    <span class="n">dy</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">xp</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">fee</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">fee</span> <span class="o">*</span> <span class="n">dy</span> <span class="o">/</span> <span class="n">FEE_DENOMINATOR</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">dy</span> <span class="o">-</span> <span class="n">fee</span><span class="p">)</span> <span class="o">*</span> <span class="n">PRECISION</span> <span class="o">/</span> <span class="n">rates</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>还有个 <code class="language-plaintext highlighter-rouge">_get_y_D()</code> 函数，与上述区别是可以自定义 D 的值来求 y</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre><span class="o">@</span><span class="n">pure</span>
+<span class="o">@</span><span class="n">internal</span>
+<span class="k">def</span> <span class="nf">_get_y_D</span><span class="p">(</span><span class="n">A</span><span class="p">:</span> <span class="n">uint256</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="n">int128</span><span class="p">,</span> <span class="n">_xp</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">],</span> <span class="n">D</span><span class="p">:</span> <span class="n">uint256</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">uint256</span><span class="p">:</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="calc_withdraw_one_coin">calc_withdraw_one_coin</h4>
+
+<p>指定移除流动性 LP token 的数量，计算只赎回单一资产的数量。</p>
+
+<ol>
+  <li>根据 <code class="language-plaintext highlighter-rouge">_token_amount</code> 和 <code class="language-plaintext highlighter-rouge">total_supply</code> 的比例，同比计算不考虑手续费的 D 值</li>
+  <li>根据新的 D 值计算此次移除，产生的交易量，收取手续费</li>
+  <li>根据扣除手续费新的数量，计算实际的 D 值</li>
+</ol>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+</pre></td><td class="rouge-code"><pre><span class="o">@</span><span class="n">view</span>
+<span class="o">@</span><span class="n">internal</span>
+<span class="k">def</span> <span class="nf">_calc_withdraw_one_coin</span><span class="p">(</span><span class="n">_token_amount</span><span class="p">:</span> <span class="n">uint256</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="n">int128</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">uint256</span><span class="p">,</span> <span class="n">uint256</span><span class="p">,</span> <span class="n">uint256</span><span class="p">):</span>
+    <span class="c1"># First, need to calculate
+</span>    <span class="c1"># * Get current D
+</span>    <span class="c1"># * Solve Eqn against y_i for D - _token_amount
+</span>    <span class="c1"># 首先需要先计算出移除流动性后，资产i的新数量
+</span>    <span class="n">amp</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_A</span><span class="p">()</span>
+    <span class="n">xp</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_xp</span><span class="p">()</span>
+    <span class="n">D0</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_get_D</span><span class="p">(</span><span class="n">xp</span><span class="p">,</span> <span class="n">amp</span><span class="p">)</span>
+
+    <span class="c1"># 根据 lp token 变化量同比计算D的新值
+</span>    <span class="c1"># 牛顿法计算新的资产 i 的数量 new_y - 不考虑手续费
+</span>    <span class="c1"># xp_reduced 资产价值减少后的量
+</span>    <span class="n">total_supply</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">CurveToken</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">lp_token</span><span class="p">).</span><span class="n">totalSupply</span><span class="p">()</span>
+    <span class="n">D1</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">D0</span> <span class="o">-</span> <span class="n">_token_amount</span> <span class="o">*</span> <span class="n">D0</span> <span class="o">/</span> <span class="n">total_supply</span>
+    <span class="n">new_y</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_get_y_D</span><span class="p">(</span><span class="n">amp</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">xp</span><span class="p">,</span> <span class="n">D1</span><span class="p">)</span>
+    <span class="n">xp_reduced</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]</span> <span class="o">=</span> <span class="n">xp</span>
+    <span class="n">fee</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">fee</span> <span class="o">*</span> <span class="n">N_COINS</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="p">(</span><span class="n">N_COINS</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_COINS</span><span class="p">):</span>
+        <span class="c1"># dx_expected 资产j价值的变量
+</span>        <span class="c1">#   - 相对于按照比例移除流动性的数量
+</span>        <span class="c1">#   - 不考虑手续费
+</span>        <span class="c1"># 资产i相对新的xp要少，其他则是相对于新的xp要多，因此需要注意正负号
+</span>        <span class="n">dx_expected</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="n">i</span><span class="p">:</span>
+            <span class="n">dx_expected</span> <span class="o">=</span> <span class="n">xp</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">D1</span> <span class="o">/</span> <span class="n">D0</span> <span class="o">-</span> <span class="n">new_y</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dx_expected</span> <span class="o">=</span> <span class="n">xp</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">xp</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">D1</span> <span class="o">/</span> <span class="n">D0</span>
+        <span class="c1"># 在输出资产上扣除手续费
+</span>        <span class="n">xp_reduced</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-=</span> <span class="n">fee</span> <span class="o">*</span> <span class="n">dx_expected</span> <span class="o">/</span> <span class="n">FEE_DENOMINATOR</span>
+
+    <span class="c1"># 使用扣除手续费的xp计算 y，进而得出dy
+</span>    <span class="n">dy</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">xp_reduced</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="p">.</span><span class="n">get_y_D</span><span class="p">(</span><span class="n">amp</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">xp_reduced</span><span class="p">,</span> <span class="n">D1</span><span class="p">)</span>
+    <span class="n">precisions</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]</span> <span class="o">=</span> <span class="n">PRECISION_MUL</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="p">(</span><span class="n">dy</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">precisions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># Withdraw less to account for rounding errors
+</span>    <span class="n">dy_0</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="p">(</span><span class="n">xp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">new_y</span><span class="p">)</span> <span class="o">/</span> <span class="n">precisions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># w/o fees
+</span>
+    <span class="c1"># 返回 赎回的资产数量，扣除的手续费(价值), lp token 总量（销毁之前）
+</span>    <span class="k">return</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dy_0</span> <span class="o">-</span> <span class="n">dy</span><span class="p">,</span> <span class="n">total_supply</span>
+
+
+<span class="o">@</span><span class="n">view</span>
+<span class="o">@</span><span class="n">external</span>
+<span class="k">def</span> <span class="nf">calc_withdraw_one_coin</span><span class="p">(</span><span class="n">_token_amount</span><span class="p">:</span> <span class="n">uint256</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="n">int128</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">uint256</span><span class="p">:</span>
+    <span class="s">"""
+    @notice Calculate the amount received when withdrawing a single coin
+    @param _token_amount Amount of LP tokens to burn in the withdrawal
+    @param i Index value of the coin to withdraw
+    @return Amount of coin received
+    """</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="p">.</span><span class="n">_calc_withdraw_one_coin</span><span class="p">(</span><span class="n">_token_amount</span><span class="p">,</span> <span class="n">i</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="remove_liquidity_one_coin">remove_liquidity_one_coin</h4>
+
+<p>移除流动性，赎回单一种类资产。可以认为这期间是将其他资产交易为了单一资产，需要手续手续费。</p>
+
+<p>传入要销毁的 lp token 数量 <code class="language-plaintext highlighter-rouge">_token_amount</code>，赎回资产序号 <code class="language-plaintext highlighter-rouge">i</code>, 最小要收到的资产数量 <code class="language-plaintext highlighter-rouge">_min_amount</code>， 返回实际赎回的资产数量。</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+</pre></td><td class="rouge-code"><pre><span class="o">@</span><span class="n">external</span>
+<span class="o">@</span><span class="n">nonreentrant</span><span class="p">(</span><span class="s">'lock'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">remove_liquidity_one_coin</span><span class="p">(</span><span class="n">_token_amount</span><span class="p">:</span> <span class="n">uint256</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="n">int128</span><span class="p">,</span> <span class="n">_min_amount</span><span class="p">:</span> <span class="n">uint256</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">uint256</span><span class="p">:</span>
+    <span class="s">"""
+    @notice Withdraw a single coin from the pool
+    @param _token_amount Amount of LP tokens to burn in the withdrawal
+    @param i Index value of the coin to withdraw
+    @param _min_amount Minimum amount of coin to receive
+    @return Amount of coin received
+    """</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">.</span><span class="n">is_killed</span>  <span class="c1"># dev: is killed
+</span>
+    <span class="c1"># 预先计算本次移除将赎回的资产数量 dy
+</span>    <span class="c1"># 如果 dy 小于设定的最小数量，交易回滚
+</span>    <span class="n">dy</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">dy_fee</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">total_supply</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">dy</span><span class="p">,</span> <span class="n">dy_fee</span><span class="p">,</span> <span class="n">total_supply</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_calc_withdraw_one_coin</span><span class="p">(</span><span class="n">_token_amount</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">dy</span> <span class="o">&gt;=</span> <span class="n">_min_amount</span><span class="p">,</span> <span class="s">"Not enough coins removed"</span>
+
+    <span class="c1"># 将 admin fee 从balances中扣除
+</span>    <span class="c1"># 销毁掉设定的 lp token 数量
+</span>    <span class="c1">#
+</span>    <span class="c1"># 注意 _calc_withdraw_one_coin() 返回的 dy 是已经扣除掉手续费的数量
+</span>    <span class="c1"># 所以这里需要单独从balances中扣除协议费
+</span>    <span class="bp">self</span><span class="p">.</span><span class="n">balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-=</span> <span class="p">(</span><span class="n">dy</span> <span class="o">+</span> <span class="n">dy_fee</span> <span class="o">*</span> <span class="bp">self</span><span class="p">.</span><span class="n">admin_fee</span> <span class="o">/</span> <span class="n">FEE_DENOMINATOR</span><span class="p">)</span>
+    <span class="n">CurveToken</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">lp_token</span><span class="p">).</span><span class="n">burnFrom</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">sender</span><span class="p">,</span> <span class="n">_token_amount</span><span class="p">)</span>  <span class="c1"># dev: insufficient funds
+</span>
+    <span class="c1"># 将赎回token转给用户
+</span>    <span class="n">_response</span><span class="p">:</span> <span class="n">Bytes</span><span class="p">[</span><span class="mi">32</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw_call</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">coins</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+        <span class="n">concat</span><span class="p">(</span>
+            <span class="n">method_id</span><span class="p">(</span><span class="s">"transfer(address,uint256)"</span><span class="p">),</span>
+            <span class="n">convert</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">sender</span><span class="p">,</span> <span class="n">bytes32</span><span class="p">),</span>
+            <span class="n">convert</span><span class="p">(</span><span class="n">dy</span><span class="p">,</span> <span class="n">bytes32</span><span class="p">),</span>
+        <span class="p">),</span>
+        <span class="n">max_outsize</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_response</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">convert</span><span class="p">(</span><span class="n">_response</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+
+    <span class="n">log</span> <span class="n">RemoveLiquidityOne</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">sender</span><span class="p">,</span> <span class="n">_token_amount</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">total_supply</span> <span class="o">-</span> <span class="n">_token_amount</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dy</span>
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="admin-functions">Admin functions</h3>
+
+<p>管理员调用的方法</p>
+
+<h4 id="as-adjustment">A’s adjustment</h4>
+
+<p>A 参数的调整，传入目标值 <code class="language-plaintext highlighter-rouge">_future_A</code>，预定调整结束时间 <code class="language-plaintext highlighter-rouge">_future_time</code>。</p>
+
+<p>当调用 <code class="language-plaintext highlighter-rouge">ramp_A()</code> 后，A 参数会随时间线性改变，直到 <code class="language-plaintext highlighter-rouge">_future_time</code> 完成调整，达到预设的目标值。这期间池子的计算涉及 A 值都会线性的计算当前值。</p>
+
+<p>调整期间管理员可以调用 <code class="language-plaintext highlighter-rouge">stop_ramp_A</code> 终止调整进度，A 会保持当前的值。</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+</pre></td><td class="rouge-code"><pre><span class="o">@</span><span class="n">external</span>
+<span class="k">def</span> <span class="nf">ramp_A</span><span class="p">(</span><span class="n">_future_A</span><span class="p">:</span> <span class="n">uint256</span><span class="p">,</span> <span class="n">_future_time</span><span class="p">:</span> <span class="n">uint256</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">msg</span><span class="p">.</span><span class="n">sender</span> <span class="o">==</span> <span class="bp">self</span><span class="p">.</span><span class="n">owner</span>  <span class="c1"># dev: only owner
+</span>    <span class="k">assert</span> <span class="n">block</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="p">.</span><span class="n">initial_A_time</span> <span class="o">+</span> <span class="n">MIN_RAMP_TIME</span>
+    <span class="k">assert</span> <span class="n">_future_time</span> <span class="o">&gt;=</span> <span class="n">block</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">+</span> <span class="n">MIN_RAMP_TIME</span>  <span class="c1"># dev: insufficient time
+</span>
+    <span class="n">initial_A</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_A</span><span class="p">()</span>
+    <span class="n">future_A_p</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">_future_A</span> <span class="o">*</span> <span class="n">A_PRECISION</span>
+
+    <span class="k">assert</span> <span class="n">_future_A</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">_future_A</span> <span class="o">&lt;</span> <span class="n">MAX_A</span>
+    <span class="k">if</span> <span class="n">future_A_p</span> <span class="o">&lt;</span> <span class="n">initial_A</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">future_A_p</span> <span class="o">*</span> <span class="n">MAX_A_CHANGE</span> <span class="o">&gt;=</span> <span class="n">initial_A</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">future_A_p</span> <span class="o">&lt;=</span> <span class="n">initial_A</span> <span class="o">*</span> <span class="n">MAX_A_CHANGE</span>
+
+    <span class="bp">self</span><span class="p">.</span><span class="n">initial_A</span> <span class="o">=</span> <span class="n">initial_A</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">future_A</span> <span class="o">=</span> <span class="n">future_A_p</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">initial_A_time</span> <span class="o">=</span> <span class="n">block</span><span class="p">.</span><span class="n">timestamp</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">future_A_time</span> <span class="o">=</span> <span class="n">_future_time</span>
+
+    <span class="n">log</span> <span class="n">RampA</span><span class="p">(</span><span class="n">initial_A</span><span class="p">,</span> <span class="n">future_A_p</span><span class="p">,</span> <span class="n">block</span><span class="p">.</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">_future_time</span><span class="p">)</span>
+
+
+<span class="o">@</span><span class="n">external</span>
+<span class="k">def</span> <span class="nf">stop_ramp_A</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">msg</span><span class="p">.</span><span class="n">sender</span> <span class="o">==</span> <span class="bp">self</span><span class="p">.</span><span class="n">owner</span>  <span class="c1"># dev: only owner
+</span>
+    <span class="n">current_A</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_A</span><span class="p">()</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">initial_A</span> <span class="o">=</span> <span class="n">current_A</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">future_A</span> <span class="o">=</span> <span class="n">current_A</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">initial_A_time</span> <span class="o">=</span> <span class="n">block</span><span class="p">.</span><span class="n">timestamp</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">future_A_time</span> <span class="o">=</span> <span class="n">block</span><span class="p">.</span><span class="n">timestamp</span>
+    <span class="c1"># now (block.timestamp &lt; t1) is always False, so we return saved A
+</span>
+    <span class="n">log</span> <span class="n">StopRampA</span><span class="p">(</span><span class="n">current_A</span><span class="p">,</span> <span class="n">block</span><span class="p">.</span><span class="n">timestamp</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="fees-adjustment">fee’s adjustment</h4>
+
+<p>fee 和 admin fee 的调整</p>
+
+<ol>
+  <li>管理员提交调整方案 <code class="language-plaintext highlighter-rouge">commit_new_fee()</code>
+    <ul>
+      <li>如果期间有其他待执行的方案，将不能提交</li>
+      <li><code class="language-plaintext highlighter-rouge">assert self.admin_actions_deadline == 0</code></li>
+      <li>自动设置最早执行时间为 <code class="language-plaintext highlighter-rouge">block.timestamp + ADMIN_ACTIONS_DELAY</code></li>
+      <li>ADMIN_ACTIONS_DELAY = 3 * 86400 s 即等待期 3 天</li>
+    </ul>
+  </li>
+  <li>在等待期过后，管理员执行 <code class="language-plaintext highlighter-rouge">apply_new_fee()</code> 让新的费率参数生效
+    <ul>
+      <li>根据 admin_actions_deadline 是否为零判断当前是否有待执行方案</li>
+      <li><code class="language-plaintext highlighter-rouge">assert self.admin_actions_deadline != 0</code></li>
+    </ul>
+  </li>
+  <li>等待期间，管理员可调用 <code class="language-plaintext highlighter-rouge">revert_new_parameters()</code> 取消调整方案</li>
+</ol>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+</pre></td><td class="rouge-code"><pre><span class="o">@</span><span class="n">external</span>
+<span class="k">def</span> <span class="nf">commit_new_fee</span><span class="p">(</span><span class="n">_new_fee</span><span class="p">:</span> <span class="n">uint256</span><span class="p">,</span> <span class="n">_new_admin_fee</span><span class="p">:</span> <span class="n">uint256</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">msg</span><span class="p">.</span><span class="n">sender</span> <span class="o">==</span> <span class="bp">self</span><span class="p">.</span><span class="n">owner</span>  <span class="c1"># dev: only owner
+</span>    <span class="k">assert</span> <span class="bp">self</span><span class="p">.</span><span class="n">admin_actions_deadline</span> <span class="o">==</span> <span class="mi">0</span>  <span class="c1"># dev: active action
+</span>    <span class="k">assert</span> <span class="n">_new_fee</span> <span class="o">&lt;=</span> <span class="n">MAX_FEE</span>  <span class="c1"># dev: fee exceeds maximum
+</span>    <span class="k">assert</span> <span class="n">_new_admin_fee</span> <span class="o">&lt;=</span> <span class="n">MAX_ADMIN_FEE</span>  <span class="c1"># dev: admin fee exceeds maximum
+</span>
+    <span class="n">deadline</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">block</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">+</span> <span class="n">ADMIN_ACTIONS_DELAY</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">admin_actions_deadline</span> <span class="o">=</span> <span class="n">deadline</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">future_fee</span> <span class="o">=</span> <span class="n">_new_fee</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">future_admin_fee</span> <span class="o">=</span> <span class="n">_new_admin_fee</span>
+
+    <span class="n">log</span> <span class="n">CommitNewFee</span><span class="p">(</span><span class="n">deadline</span><span class="p">,</span> <span class="n">_new_fee</span><span class="p">,</span> <span class="n">_new_admin_fee</span><span class="p">)</span>
+
+
+<span class="o">@</span><span class="n">external</span>
+<span class="k">def</span> <span class="nf">apply_new_fee</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">msg</span><span class="p">.</span><span class="n">sender</span> <span class="o">==</span> <span class="bp">self</span><span class="p">.</span><span class="n">owner</span>  <span class="c1"># dev: only owner
+</span>    <span class="k">assert</span> <span class="n">block</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="p">.</span><span class="n">admin_actions_deadline</span>  <span class="c1"># dev: insufficient time
+</span>    <span class="k">assert</span> <span class="bp">self</span><span class="p">.</span><span class="n">admin_actions_deadline</span> <span class="o">!=</span> <span class="mi">0</span>  <span class="c1"># dev: no active action
+</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">admin_actions_deadline</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">fee</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">future_fee</span>
+    <span class="n">admin_fee</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">future_admin_fee</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">fee</span> <span class="o">=</span> <span class="n">fee</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">admin_fee</span> <span class="o">=</span> <span class="n">admin_fee</span>
+
+    <span class="n">log</span> <span class="n">NewFee</span><span class="p">(</span><span class="n">fee</span><span class="p">,</span> <span class="n">admin_fee</span><span class="p">)</span>
+
+
+<span class="o">@</span><span class="n">external</span>
+<span class="k">def</span> <span class="nf">revert_new_parameters</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">msg</span><span class="p">.</span><span class="n">sender</span> <span class="o">==</span> <span class="bp">self</span><span class="p">.</span><span class="n">owner</span>  <span class="c1"># dev: only owner
+</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">admin_actions_deadline</span> <span class="o">=</span> <span class="mi">0</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="ownership">ownership</h4>
+
+<p>移交合约 owner。与手续费调整类似，先提交方案，等待期过后，才能执行方案。</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+</pre></td><td class="rouge-code"><pre><span class="o">@</span><span class="n">external</span>
+<span class="k">def</span> <span class="nf">commit_transfer_ownership</span><span class="p">(</span><span class="n">_owner</span><span class="p">:</span> <span class="n">address</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">msg</span><span class="p">.</span><span class="n">sender</span> <span class="o">==</span> <span class="bp">self</span><span class="p">.</span><span class="n">owner</span>  <span class="c1"># dev: only owner
+</span>    <span class="k">assert</span> <span class="bp">self</span><span class="p">.</span><span class="n">transfer_ownership_deadline</span> <span class="o">==</span> <span class="mi">0</span>  <span class="c1"># dev: active transfer
+</span>
+    <span class="n">deadline</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">block</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">+</span> <span class="n">ADMIN_ACTIONS_DELAY</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">transfer_ownership_deadline</span> <span class="o">=</span> <span class="n">deadline</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">future_owner</span> <span class="o">=</span> <span class="n">_owner</span>
+
+    <span class="n">log</span> <span class="n">CommitNewAdmin</span><span class="p">(</span><span class="n">deadline</span><span class="p">,</span> <span class="n">_owner</span><span class="p">)</span>
+
+
+<span class="o">@</span><span class="n">external</span>
+<span class="k">def</span> <span class="nf">apply_transfer_ownership</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">msg</span><span class="p">.</span><span class="n">sender</span> <span class="o">==</span> <span class="bp">self</span><span class="p">.</span><span class="n">owner</span>  <span class="c1"># dev: only owner
+</span>    <span class="k">assert</span> <span class="n">block</span><span class="p">.</span><span class="n">timestamp</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="p">.</span><span class="n">transfer_ownership_deadline</span>  <span class="c1"># dev: insufficient time
+</span>    <span class="k">assert</span> <span class="bp">self</span><span class="p">.</span><span class="n">transfer_ownership_deadline</span> <span class="o">!=</span> <span class="mi">0</span>  <span class="c1"># dev: no active transfer
+</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">transfer_ownership_deadline</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">owner</span><span class="p">:</span> <span class="n">address</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">future_owner</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">owner</span> <span class="o">=</span> <span class="n">owner</span>
+
+    <span class="n">log</span> <span class="n">NewAdmin</span><span class="p">(</span><span class="n">owner</span><span class="p">)</span>
+
+<span class="o">@</span><span class="n">external</span>
+<span class="k">def</span> <span class="nf">revert_transfer_ownership</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">msg</span><span class="p">.</span><span class="n">sender</span> <span class="o">==</span> <span class="bp">self</span><span class="p">.</span><span class="n">owner</span>  <span class="c1"># dev: only owner
+</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">transfer_ownership_deadline</span> <span class="o">=</span> <span class="mi">0</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="admin_fee-withdraw-and-donate">admin_fee withdraw and donate</h4>
+
+<p>提取和捐赠 admin_fee</p>
+
+<ul>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">withdraw_admin_fees()</code> 提取协议费，将每种资产分别转给调用者（管理员）</p>
+
+    <ul>
+      <li>admin_fee 的数量没有专门的字段存储，而是通过 合约持有的总量 - 流动性提供者持有的总量(balances) 获得</li>
+      <li><code class="language-plaintext highlighter-rouge">ERC20(coin).balanceOf(self) - self.balances[i]</code></li>
+    </ul>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">donate_admin_fees()</code> 将未提取的协议费全部捐赠给池子的流动性提供者</p>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">self.balances[i] = ERC20(self.coins[i]).balanceOf(self)</code></li>
+      <li>上述操作实质上是将协议费的数量清零，全部转移到 balances 上</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+</pre></td><td class="rouge-code"><pre><span class="o">@</span><span class="n">view</span>
+<span class="o">@</span><span class="n">external</span>
+<span class="k">def</span> <span class="nf">admin_balances</span><span class="p">(</span><span class="n">i</span><span class="p">:</span> <span class="n">uint256</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">uint256</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">ERC20</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">coins</span><span class="p">[</span><span class="n">i</span><span class="p">]).</span><span class="n">balanceOf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="p">.</span><span class="n">balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+
+<span class="o">@</span><span class="n">external</span>
+<span class="k">def</span> <span class="nf">withdraw_admin_fees</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">msg</span><span class="p">.</span><span class="n">sender</span> <span class="o">==</span> <span class="bp">self</span><span class="p">.</span><span class="n">owner</span>  <span class="c1"># dev: only owner
+</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_COINS</span><span class="p">):</span>
+        <span class="n">coin</span><span class="p">:</span> <span class="n">address</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">coins</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">value</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">ERC20</span><span class="p">(</span><span class="n">coin</span><span class="p">).</span><span class="n">balanceOf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="p">.</span><span class="n">balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">_response</span><span class="p">:</span> <span class="n">Bytes</span><span class="p">[</span><span class="mi">32</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw_call</span><span class="p">(</span>
+                <span class="n">coin</span><span class="p">,</span>
+                <span class="n">concat</span><span class="p">(</span>
+                    <span class="n">method_id</span><span class="p">(</span><span class="s">"transfer(address,uint256)"</span><span class="p">),</span>
+                    <span class="n">convert</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">sender</span><span class="p">,</span> <span class="n">bytes32</span><span class="p">),</span>
+                    <span class="n">convert</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">bytes32</span><span class="p">),</span>
+                <span class="p">),</span>
+                <span class="n">max_outsize</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+            <span class="p">)</span>  <span class="c1"># dev: failed transfer
+</span>            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_response</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">convert</span><span class="p">(</span><span class="n">_response</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+
+
+<span class="o">@</span><span class="n">external</span>
+<span class="k">def</span> <span class="nf">donate_admin_fees</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">msg</span><span class="p">.</span><span class="n">sender</span> <span class="o">==</span> <span class="bp">self</span><span class="p">.</span><span class="n">owner</span>  <span class="c1"># dev: only owner
+</span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_COINS</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ERC20</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">coins</span><span class="p">[</span><span class="n">i</span><span class="p">]).</span><span class="n">balanceOf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="kill_me">kill_me</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">kill_me()</code> 停止合约交易和增减流动性功能</li>
+  <li><code class="language-plaintext highlighter-rouge">unkill_me()</code> 重新开启交易和增加流动性功能</li>
+</ul>
+
+<p>当 <code class="language-plaintext highlighter-rouge">is_killed</code> 为 true 时，合约不能运行下列方法：</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">add_liquidity()</code></li>
+  <li><code class="language-plaintext highlighter-rouge">exchange()</code></li>
+  <li><code class="language-plaintext highlighter-rouge">remove_liquidity_imbalance()</code></li>
+  <li><code class="language-plaintext highlighter-rouge">remove_liquidity_one_coin()</code></li>
+</ul>
+
+<p>注意：<code class="language-plaintext highlighter-rouge">remove_liquidity</code> 是可以运行的，允许流动性提供者撤走流动性，但期间不能发生交易行为，即必须按照当前价格移除流动性。</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="rouge-code"><pre><span class="o">@</span><span class="n">external</span>
+<span class="k">def</span> <span class="nf">kill_me</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">msg</span><span class="p">.</span><span class="n">sender</span> <span class="o">==</span> <span class="bp">self</span><span class="p">.</span><span class="n">owner</span>  <span class="c1"># dev: only owner
+</span>    <span class="k">assert</span> <span class="bp">self</span><span class="p">.</span><span class="n">kill_deadline</span> <span class="o">&gt;</span> <span class="n">block</span><span class="p">.</span><span class="n">timestamp</span>  <span class="c1"># dev: deadline has passed
+</span>    <span class="bp">self</span><span class="p">.</span><span class="n">is_killed</span> <span class="o">=</span> <span class="bp">True</span>
+
+
+<span class="o">@</span><span class="n">external</span>
+<span class="k">def</span> <span class="nf">unkill_me</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">msg</span><span class="p">.</span><span class="n">sender</span> <span class="o">==</span> <span class="bp">self</span><span class="p">.</span><span class="n">owner</span>  <span class="c1"># dev: only owner
+</span>    <span class="bp">self</span><span class="p">.</span><span class="n">is_killed</span> <span class="o">=</span> <span class="bp">False</span>
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="a-pool-and-y-pool">a-pool and y-pool</h3>
+
+<p>相比于base-pool, a-pool 与 y-pool 主要由于其对应的token并不是标准的ERC20，需要做一些适配。</p>
+
+<ul>
+  <li>a-pool 对应aToken类型，其 <code class="language-plaintext highlighter-rouge">balanceOf()</code> 返回的余额不是标准的balance，而是计算了累加利息的数量</li>
+  <li>y-pool 对应 yearn 和 Compound 的 <code class="language-plaintext highlighter-rouge">CToken</code>，其兑换底层资产的汇率会改变</li>
+  <li>在 base pool 中， <code class="language-plaintext highlighter-rouge">RATES</code> 将只起到统一精度的作用，但在 y-pool 和 a-pool 中 <code class="language-plaintext highlighter-rouge">RATES</code> 不但要统一精度，还需要从外部合约获取 coin 和其底层资产之间的汇率</li>
+</ul>
+
+<h4 id="a-pool">a-pool</h4>
+
+<p>这里以 <code class="language-plaintext highlighter-rouge">StableSwapAave.vy</code> 作为解析示例(使用a模板创建)</p>
+
+<h4 id="y-pool">y-pool</h4>
+
+<p>这里以 <code class="language-plaintext highlighter-rouge">StableSwapCompound.vy</code> 作为解析示例(使用y模板创建)</p>
+
+<ul>
+  <li>在 Compound pool 中，RATES 将从 <code class="language-plaintext highlighter-rouge">cERC20.exchangeRateStored()</code> 外部合约方法中，获取 <code class="language-plaintext highlighter-rouge">CToken</code> 与其对应的底层资产的汇率</li>
+  <li>因为 <code class="language-plaintext highlighter-rouge">CToken</code> 是一种内增值的 ERC20 变种 token，每单位 <code class="language-plaintext highlighter-rouge">CToken</code> 所能兑换的对应底层资产将随着借贷利息的累加而不同</li>
+  <li><code class="language-plaintext highlighter-rouge">_xp(rates)</code> 的定义和base-pool不同，RATES使用传入的值，即 <code class="language-plaintext highlighter-rouge">cERC20.exchangeRateStored()</code></li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+</pre></td><td class="rouge-code"><pre><span class="c1"># contracts/pools/compound/StableSwapCompound.vy
+</span>
+<span class="o">@</span><span class="n">private</span>
+<span class="o">@</span><span class="n">constant</span>
+<span class="k">def</span> <span class="nf">_stored_rates</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]:</span>
+    <span class="c1"># exchangeRateStored * (1 + supplyRatePerBlock * (getBlockNumber - accrualBlockNumber) / 1e18)
+</span>    <span class="n">result</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]</span> <span class="o">=</span> <span class="n">PRECISION_MUL</span>
+    <span class="n">use_lending</span><span class="p">:</span> <span class="nb">bool</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]</span> <span class="o">=</span> <span class="n">USE_LENDING</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_COINS</span><span class="p">):</span>
+        <span class="n">rate</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">LENDING_PRECISION</span>  <span class="c1"># Used with no lending
+</span>        <span class="k">if</span> <span class="n">use_lending</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+            <span class="n">rate</span> <span class="o">=</span> <span class="n">cERC20</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">coins</span><span class="p">[</span><span class="n">i</span><span class="p">]).</span><span class="n">exchangeRateStored</span><span class="p">()</span> <span class="c1"># 这里获取最新的汇率
+</span>            <span class="n">supply_rate</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">cERC20</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">coins</span><span class="p">[</span><span class="n">i</span><span class="p">]).</span><span class="n">supplyRatePerBlock</span><span class="p">()</span>
+            <span class="n">old_block</span><span class="p">:</span> <span class="n">uint256</span> <span class="o">=</span> <span class="n">cERC20</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">coins</span><span class="p">[</span><span class="n">i</span><span class="p">]).</span><span class="n">accrualBlockNumber</span><span class="p">()</span>
+            <span class="n">rate</span> <span class="o">+=</span> <span class="n">rate</span> <span class="o">*</span> <span class="n">supply_rate</span> <span class="o">*</span> <span class="p">(</span><span class="n">block</span><span class="p">.</span><span class="n">number</span> <span class="o">-</span> <span class="n">old_block</span><span class="p">)</span> <span class="o">/</span> <span class="n">LENDING_PRECISION</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*=</span> <span class="n">rate</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+<span class="o">@</span><span class="n">private</span>
+<span class="o">@</span><span class="n">constant</span>
+<span class="k">def</span> <span class="nf">_xp</span><span class="p">(</span><span class="n">rates</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]:</span>
+    <span class="n">result</span><span class="p">:</span> <span class="n">uint256</span><span class="p">[</span><span class="n">N_COINS</span><span class="p">]</span> <span class="o">=</span> <span class="n">rates</span> <span class="c1"># rates通过入参传入
+</span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_COINS</span><span class="p">):</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="p">.</span><span class="n">balances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">PRECISION</span>
+    <span class="k">return</span> <span class="n">result</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+
+                <hr style="visibility: hidden;">
+                <ul class="pager">
+                    
+                    
+                </ul>
+                <hr style="visibility: hidden;">
+
+                
+                <!-- disqus 评论框 start -->
+                <div class="comment">
+                    <div id="disqus_thread" class="disqus-thread"></div>
+                </div>
+                <!-- disqus 评论框 end -->
+                
+
+                
+            </div>  
+
+    <!-- Side Catalog Container -->
+        
+            <div class="
+                col-lg-2 col-lg-offset-0
+                visible-lg-block
+                sidebar-container
+                catalog-container">
+                <div class="side-catalog">
+                    <hr class="hidden-sm hidden-xs">
+                    <h5>
+                        <a class="catalog-toggle" href="#">CATALOG</a>
+                    </h5>
+                    <ul class="catalog-body"></ul>
+                </div>
+            </div>
+        
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+
+
+<section>
+    
+        <hr class="hidden-sm hidden-xs">
+    
+    <h5><a href="/archive/">FEATURED TAGS</a></h5>
+    <div class="tags">
+        
+        
+        
+        
+        
+    </div>
+</section>
+
+
+                <!-- Friends Blog -->
+                
+<hr>
+<h5>FRIENDS</h5>
+<ul class="list-inline">
+  
+  <li><a href="https://snzholding.com/">SNZ</a></li>
+  
+  <li><a href="https://0xmc.com/">0xmc</a></li>
+  
+  <li><a href="https://0xstan.com/">0xstan</a></li>
+  
+</ul>
+
+
+            </div>
+        </div>
+    </div>
+</article>
+
+<!-- add support for mathjax by voleking-->
+
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    TeX: {
+      equationNumbers: {
+        autoNumber: "AMS"
+      }
+    },
+    SVG: {
+      scale: 90
+    },
+    tex2jax: {
+      inlineMath: [ ['$','$'] ],
+      displayMath: [ ['$$','$$'] ],
+      processEscapes: true,
+    }
+  });
+</script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG">
+</script>
+
+
+
+
+
+
+<!-- disqus 公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = "snzresearch";
+    var disqus_identifier = "/2022/02/12/Curve-v1-StableSwap";
+    var disqus_url = "http://localhost:4000/2022/02/12/Curve-v1-StableSwap/";
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<!-- disqus 公共JS代码 end -->
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'right',
+          // icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <!-- SNS Link -->
+                
+
+
+<ul class="list-inline text-center">
+
+
+  
+  
+  <li>
+    <a href="https://twitter.com/snzresearch">
+      <span class="fa-stack fa-lg">
+        <i class="fa fa-circle fa-stack-2x"></i>
+        <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+      </span>
+    </a>
+  </li>
+  
+  
+  <li>
+    <a target="_blank" href="https://medium.com/@SNZ_Research">
+      <span class="fa-stack fa-lg">
+        <i class="fa fa-circle fa-stack-2x"></i>
+        <i class="fa fa-stack-1x fa-inverse">M</i>
+      </span>
+    </a>
+  </li>
+  
+  
+  <li>
+    <a target="_blank" href="https://github.com/SNZresearch">
+      <span class="fa-stack fa-lg">
+        <i class="fa fa-circle fa-stack-2x"></i>
+        <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+      </span>
+    </a>
+  </li>
+  
+  <!-- 
+   -->
+  
+  
+</ul>
+
+                <p class="copyright text-muted">
+                    Copyright &copy; SNZresearch 2022
+                    <br>
+                    Powered by <a href="https://huangxuan.me">Hux Blog</a> |
+                    <iframe style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0" width="100px"
+                        height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=huxpro&repo=huxpro.github.io&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<!-- Currently, only navbar scroll-down effect at desktop still depends on this -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+<!-- Simple Jekyll Search -->
+<script src="/js/simple-jekyll-search.min.js"></script>
+
+<!-- Service Worker -->
+
+<script src="/js/snackbar.js "></script>
+<script src="/js/sw-registration.js "></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+        var d = document, t = 'script',
+            o = d.createElement(t),
+            s = d.getElementsByTagName(t)[0];
+        o.src = u;
+        if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+        s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!--
+     Because of the native support for backtick-style fenced code blocks
+     right within the Markdown is landed in Github Pages,
+     From V1.6, There is no need for Highlight.js,
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/
+     - https://github.com/jneen/rouge/wiki/list-of-supported-languages-and-lexers
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+
+
+
+
+
+<!--fastClick.js -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function () {
+        var $nav = document.querySelector("nav");
+        if ($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = '';
+    var _gaDomain = 'snzresearch.com';
+
+    // Originial
+    (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+            (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+            m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+<!-- Side Catalog -->
+
+<script type="text/javascript">
+    function generateCatalog(selector) {
+
+        // interop with multilangual 
+        if ('' == 'true') {
+            _containerSelector = 'div.post-container.active'
+        } else {
+            _containerSelector = 'div.post-container'
+        }
+
+        // init
+        var P = $(_containerSelector), a, n, t, l, i, c;
+        a = P.find('h1,h2,h3,h4,h5,h6');
+
+        // clean
+        $(selector).html('')
+
+        // appending
+        a.each(function () {
+            n = $(this).prop('tagName').toLowerCase();
+            i = "#" + $(this).prop('id');
+            t = $(this).text();
+            c = $('<a href="' + i + '" rel="nofollow">' + t + '</a>');
+            l = $('<li class="' + n + '_nav"></li>').append(c);
+            $(selector).append(l);
+        });
+        return true;
+    }
+
+    generateCatalog(".catalog-body");
+
+    // toggle side catalog
+    $(".catalog-toggle").click((function (e) {
+        e.preventDefault();
+        $('.side-catalog').toggleClass("fold")
+    }))
+
+    /*
+     * Doc: https://github.com/davist11/jQuery-One-Page-Nav
+     * Fork by Hux to support padding
+     */
+    async("/js/jquery.nav.js", function () {
+        $('.catalog-body').onePageNav({
+            currentClass: "active",
+            changeHash: !1,
+            easing: "swing",
+            filter: "",
+            scrollSpeed: 700,
+            scrollOffset: 0,
+            scrollThreshold: .2,
+            begin: null,
+            end: null,
+            scrollChange: null,
+            padding: 80
+        });
+    });
+</script>
+
+
+
+<!-- Multi-Lingual -->
+
+
+<!-- Simple Jekyll Search -->
+<script>
+    // https://stackoverflow.com/questions/1912501/unescape-html-entities-in-javascript
+    function htmlDecode(input) {
+        var e = document.createElement('textarea');
+        e.innerHTML = input;
+        // handle case of empty input
+        return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
+    }
+
+    SimpleJekyllSearch({
+        searchInput: document.getElementById('search-input'),
+        resultsContainer: document.getElementById('search-results'),
+        json: '/search.json',
+        searchResultTemplate: '<div class="post-preview item"><a href="{url}"><h2 class="post-title">{title}</h2><h3 class="post-subtitle">{subtitle}</h3><hr></a></div>',
+        noResultsText: 'No results',
+        limit: 50,
+        fuzzy: false,
+        // a hack to get escaped subtitle unescaped. for some reason, 
+        // post.subtitle w/o escape filter nuke entire search.
+        templateMiddleware: function (prop, value, template) {
+            if (prop === 'subtitle' || prop === 'title') {
+                if (value.indexOf("code")) {
+                    return htmlDecode(value);
+                } else {
+                    return value;
+                }
+            }
+        }
+    });
+
+    $(document).ready(function () {
+        var $searchPage = $('.search-page');
+        var $searchOpen = $('.search-icon');
+        var $searchClose = $('.search-icon-close');
+        var $searchInput = $('#search-input');
+        var $body = $('body');
+
+        $searchOpen.on('click', function (e) {
+            e.preventDefault();
+            $searchPage.toggleClass('search-active');
+            var prevClasses = $body.attr('class') || '';
+            setTimeout(function () {
+                $body.addClass('no-scroll');
+            }, 400)
+
+            if ($searchPage.hasClass('search-active')) {
+                $searchClose.on('click', function (e) {
+                    e.preventDefault();
+                    $searchPage.removeClass('search-active');
+                    $body.attr('class', prevClasses);  // from closure 
+                });
+                $searchInput.focus();
+            }
+        });
+    });
+</script>
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
