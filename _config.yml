@@ -77,7 +77,7 @@ ga_domain: snzresearch.com
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
 sidebar-about-description: "SNZ RESEARCH"
-sidebar-avatar: https://snzresearch.com/img/avatar-snzresearch.jpeg # use absolute URL, seeing it's used in both `/` and `/about/`
+sidebar-avatar: https://snzresearch.com/img/avatar-snzresearch.png # use absolute URL, seeing it's used in both `/` and `/about/`
 
 
 
